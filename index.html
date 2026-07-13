@@ -135,7 +135,7 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
 
 <!-- HOME -->
 <div class="view active" id="view-home">
-  <div class="home-gear" onclick="navTo('settings')">⚙️</div>
+  <div class="home-gear" onclick="navTo('admin')">⚙️</div>
   <div class="home-header">
     <div class="home-title">三角洲 · 老板点单</div>
     <div class="home-sub">DELTA FORCE · BOSS ORDER</div>
@@ -177,36 +177,6 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
   <div class="form" id="createForm"></div>
 </div>
 
-<!-- SETTINGS -->
-<div class="view" id="view-settings">
-  <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title">系统设置</div></div>
-  <div style="padding:20px">
-    <div class="settings-section">
-      <h3>📢 企业微信群机器人通知</h3>
-      <div class="form-group">
-        <label class="form-label">Webhook 地址</label>
-        <input class="form-input" id="sWebhook" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=...">
-      </div>
-      <div class="settings-hint">
-        <strong>怎么获取？</strong><br>
-        1. 打开企业微信群 → 右上角 <strong>···</strong> → <strong>群机器人</strong><br>
-        2. 添加机器人 → 复制 <strong>Webhook 地址</strong><br>
-        3. 粘贴到上方 → 点下方「保存并测试」
-      </div>
-      <button class="test-btn" onclick="testWebhook()">🧪 发送测试消息</button>
-    </div>
-    <div class="settings-section">
-      <h3>🔐 管理后台</h3>
-      <div class="form-group">
-        <label class="form-label">管理密码</label>
-        <input class="form-input" id="sAdminPwd" type="password" placeholder="默认: 123456">
-      </div>
-    </div>
-    <button class="btn-gold" onclick="saveSettings()" style="margin-bottom:12px">💾 保存设置</button>
-    <button class="btn-green" onclick="navTo('admin')">📊 进入管理后台</button>
-  </div>
-</div>
-
 <!-- ADMIN -->
 <div class="view" id="view-admin">
   <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title">📊 管理后台</div></div>
@@ -221,11 +191,25 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
       <button class="admin-tab" id="tabReview" onclick="switchAdminTab('review')">🔍 审核 <span class="tab-badge" id="reviewBadge">0</span></button>
       <button class="admin-tab" id="tabPlayers" onclick="switchAdminTab('players')">👥 打手</button>
       <button class="admin-tab" id="tabMyOrders" onclick="switchAdminTab('myorders')">📋 我的订单</button>
+      <button class="admin-tab" id="tabSettings" onclick="switchAdminTab('settings')">⚙️ 设置</button>
     </div>
     <div id="panelOrders"><div class="admin-stats" id="adminStats"></div><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)">订单记录</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="orderListPanel"></div></div>
     <div id="panelReview" style="display:none"><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)">待审核打手</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="reviewListPanel"></div></div>
     <div id="panelPlayers" style="display:none"><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)" id="playerCountLabel">全部打手</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="playerManageList"></div></div>
     <div id="panelMyOrders" style="display:none"><div id="myOrdersContent"></div></div>
+    <div id="panelSettings" style="display:none"><div style="padding:16px">
+      <div class="settings-section">
+        <h3>📢 企业微信群机器人通知</h3>
+        <div class="form-group"><label class="form-label">Webhook 地址</label><input class="form-input" id="sWebhook" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..."></div>
+        <div class="settings-hint"><strong>怎么获取？</strong><br>1. 打开企业微信群 → 右上角 <strong>···</strong> → <strong>群机器人</strong><br>2. 添加机器人 → 复制 <strong>Webhook 地址</strong><br>3. 粘贴到上方 → 点下方「保存并测试」</div>
+        <button class="test-btn" onclick="testWebhook()">🧪 发送测试消息</button>
+      </div>
+      <div class="settings-section">
+        <h3>🔐 修改管理密码</h3>
+        <div class="form-group"><label class="form-label">新密码</label><input class="form-input" id="sAdminPwd" type="password" placeholder="默认: 120110"></div>
+      </div>
+      <button class="btn-gold" onclick="saveSettings()">💾 保存设置</button>
+    </div></div>
   </div>
 </div>
 
@@ -309,7 +293,6 @@ function navTo(view,params){
   if(view==='detail'&&params)renderDetail(params.id);
   if(view==='create')renderCreateForm();
   if(view==='orders')renderOrders();
-  if(view==='settings')renderSettings();
   if(view==='admin')renderAdmin();
   closeOrderPanel();
 }
@@ -454,7 +437,7 @@ function submitCreate(){
 }
 
 // ==================== SETTINGS ====================
-function renderSettings(){var c=getConfig();$_('#sWebhook').value=c.webhookUrl||'';$_('#sAdminPwd').value=c.adminPwd||''}
+function renderAdminSettings(){var c=getConfig();$_('#sWebhook').value=c.webhookUrl||'';$_('#sAdminPwd').value=c.adminPwd||''}
 function saveSettings(){
   var c={webhookUrl:$_('#sWebhook').value.trim(),adminPwd:$_('#sAdminPwd').value.trim()||'120110'};
   saveConfig(c);showToast('✅ 设置已保存');
@@ -477,17 +460,20 @@ function adminLogin(){
 }
 function switchAdminTab(tab){
   adminTab=tab;
-  $$_('.admin-tab').forEach(function(el){el.classList.toggle('active',el.id==='tab'+tab.charAt(0).toUpperCase()+tab.slice(1))});
-  // handle 'myorders' tab id specially
-  if(tab==='myorders'){$_('#tabMyOrders').classList.add('active');$_('#tabOrders').classList.remove('active')}
+  $$_('.admin-tab').forEach(function(el){el.classList.remove('active')});
+  // map tab names to button ids
+  var btnMap={orders:'tabOrders',review:'tabReview',players:'tabPlayers',myorders:'tabMyOrders',settings:'tabSettings'};
+  var btnId=btnMap[tab];if(btnId){var btn=$_('#'+btnId);if(btn)btn.classList.add('active')}
   $_('#panelOrders').style.display=tab==='orders'?'block':'none';
   $_('#panelReview').style.display=tab==='review'?'block':'none';
   $_('#panelPlayers').style.display=tab==='players'?'block':'none';
   $_('#panelMyOrders').style.display=tab==='myorders'?'block':'none';
+  $_('#panelSettings').style.display=tab==='settings'?'block':'none';
   if(tab==='orders')showOrders();
   else if(tab==='review')showReviewList();
   else if(tab==='players')showPlayerManage();
   else if(tab==='myorders')showMyOrdersAdmin();
+  else if(tab==='settings')renderAdminSettings();
 }
 function showOrders(){
   if(!isAdmin)return;
@@ -522,7 +508,7 @@ function rejectPlayer(id){
     closeModal();showToast('已拒绝');showReviewList();
   }}]);
 }
-function refreshAdmin(){if(adminTab==='orders')showOrders();else if(adminTab==='review')showReviewList();else if(adminTab==='players')showPlayerManage();showToast('已刷新')}
+function refreshAdmin(){if(adminTab==='orders')showOrders();else if(adminTab==='review')showReviewList();else if(adminTab==='players')showPlayerManage();else if(adminTab==='myorders')showMyOrdersAdmin();else if(adminTab==='settings')renderAdminSettings();showToast('已刷新')}
 
 function showPlayerManage(){
   var players=getAllPlayers();
