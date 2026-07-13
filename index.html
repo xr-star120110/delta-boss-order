@@ -143,13 +143,6 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
     <div class="home-desc">选择你的专属战士，开启胜利之旅</div>
   </div>
   <div class="cat-list" id="catList"></div>
-  <div style="padding:0 20px 12px">
-    <div class="join-card glass" onclick="navTo('orders')" style="border-color:rgba(201,169,110,0.15)!important">
-      <div class="join-icon-w" style="background:rgba(201,169,110,0.06);border-color:rgba(201,169,110,0.2)">📋</div>
-      <div class="cat-info"><div class="join-title" style="color:var(--gold)">我的订单</div><div class="join-desc">查看历史订单，评价陪玩服务</div></div>
-      <div class="cat-arrow">▶</div>
-    </div>
-  </div>
   <div class="join-section">
     <div class="join-label"><div class="line"></div><div class="text">打 手 入 驻</div><div class="line"></div></div>
     <div class="join-card glass" onclick="navTo('create')">
@@ -224,13 +217,15 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
   </div>
   <div id="adminContent" style="display:none">
     <div style="display:flex;padding:12px 20px;gap:10px">
-      <button class="admin-tab active" id="tabOrders" onclick="switchAdminTab('orders')">📋 订单</button>
+      <button class="admin-tab active" id="tabOrders" onclick="switchAdminTab('orders')">📋 订单管理</button>
       <button class="admin-tab" id="tabReview" onclick="switchAdminTab('review')">🔍 审核 <span class="tab-badge" id="reviewBadge">0</span></button>
       <button class="admin-tab" id="tabPlayers" onclick="switchAdminTab('players')">👥 打手</button>
+      <button class="admin-tab" id="tabMyOrders" onclick="switchAdminTab('myorders')">📋 我的订单</button>
     </div>
     <div id="panelOrders"><div class="admin-stats" id="adminStats"></div><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)">订单记录</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="orderListPanel"></div></div>
     <div id="panelReview" style="display:none"><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)">待审核打手</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="reviewListPanel"></div></div>
     <div id="panelPlayers" style="display:none"><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)" id="playerCountLabel">全部打手</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="playerManageList"></div></div>
+    <div id="panelMyOrders" style="display:none"><div id="myOrdersContent"></div></div>
   </div>
 </div>
 
@@ -461,7 +456,7 @@ function submitCreate(){
 // ==================== SETTINGS ====================
 function renderSettings(){var c=getConfig();$_('#sWebhook').value=c.webhookUrl||'';$_('#sAdminPwd').value=c.adminPwd||''}
 function saveSettings(){
-  var c={webhookUrl:$_('#sWebhook').value.trim(),adminPwd:$_('#sAdminPwd').value.trim()||'123456'};
+  var c={webhookUrl:$_('#sWebhook').value.trim(),adminPwd:$_('#sAdminPwd').value.trim()||'120110'};
   saveConfig(c);showToast('✅ 设置已保存');
 }
 function testWebhook(){
@@ -477,18 +472,22 @@ function renderAdmin(){
   isAdmin=false;$_('#adminLoginBox').style.display='block';$_('#adminContent').style.display='none';adminTab='orders';
 }
 function adminLogin(){
-  var cfg=getConfig();var pwd=cfg.adminPwd||'123456';
+  var cfg=getConfig();var pwd=cfg.adminPwd||'120110';
   if($_('#adminPwdInput').value===pwd){isAdmin=true;$_('#adminLoginBox').style.display='none';$_('#adminContent').style.display='block';switchAdminTab('orders')}else{showToast('密码错误')}
 }
 function switchAdminTab(tab){
   adminTab=tab;
   $$_('.admin-tab').forEach(function(el){el.classList.toggle('active',el.id==='tab'+tab.charAt(0).toUpperCase()+tab.slice(1))});
+  // handle 'myorders' tab id specially
+  if(tab==='myorders'){$_('#tabMyOrders').classList.add('active');$_('#tabOrders').classList.remove('active')}
   $_('#panelOrders').style.display=tab==='orders'?'block':'none';
   $_('#panelReview').style.display=tab==='review'?'block':'none';
   $_('#panelPlayers').style.display=tab==='players'?'block':'none';
+  $_('#panelMyOrders').style.display=tab==='myorders'?'block':'none';
   if(tab==='orders')showOrders();
   else if(tab==='review')showReviewList();
   else if(tab==='players')showPlayerManage();
+  else if(tab==='myorders')showMyOrdersAdmin();
 }
 function showOrders(){
   if(!isAdmin)return;
@@ -558,16 +557,18 @@ function toggleBusy(id){
 }
 
 // ==================== MY ORDERS ====================
-function renderOrders(){
+function renderOrders(targetId){
+  var container=targetId||'ordersContent';
   var orders=getOrders();
   var ratings=getRatings();
-  if(orders.length===0){$_('#ordersContent').innerHTML='<div class="empty-state"><span class="icon">📭</span>还没有订单<br><span style="font-size:13px">快去选个战士下单吧！</span></div>';return}
-  $_('#ordersContent').innerHTML=orders.map(function(o,i){
+  if(orders.length===0){$_('#'+container).innerHTML='<div class="empty-state"><span class="icon">📭</span>还没有订单<br><span style="font-size:13px">快去选个战士下单吧！</span></div>';return}
+  $_('#'+container).innerHTML=orders.map(function(o,i){
     var r=ratings[o.id];
     var rated=r&&r.score;
     return'<div class="order-card glass"><div class="order-card-header"><span class="order-card-player">🎯 '+(o.playerName||'未知')+'</span><span class="order-card-time">'+(o.time||'')+'</span></div><div class="order-card-body">服务：<span class="val">'+(o.quantity||1)+(o.unit||'小时')+'</span>　金额：<span class="val">¥'+(o.totalPrice||0)+'</span>　电话：<span class="order-card-phone">'+(o.phone||'')+'</span></div><div class="order-card-footer">'+(rated?'<span class="order-rated">⭐ '+r.score+'分　'+r.text+'</span>':'<button class="rate-btn" onclick="openRateModal(\''+o.id+'\',\''+o.playerName+'\')">⭐ 评价</button>')+'</div></div>';
   }).join('');
 }
+function showMyOrdersAdmin(){renderOrders('myOrdersContent')}
 var _ratingOrderId=null;
 function openRateModal(oid,pname){
   _ratingOrderId=oid;
@@ -586,7 +587,8 @@ function submitRating(){
   if(!text)text='用户已评分';
   saveRating(_ratingOrderId,_rateScore,text);
   closeModal();showToast('✅ 评价成功！感谢反馈');
-  renderOrders();
+  if(adminTab==='myorders')renderOrders('myOrdersContent');
+  else renderOrders();
 }
 
 // ==================== INIT ====================
