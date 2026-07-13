@@ -459,16 +459,15 @@ function saveSettings(){
   saveConfig(c);showToast('✅ 设置已保存');
 }
 // ==================== WECOM APP API (CORS代理) ====================
-var CORS_PROXY='https://corsproxy.io/?';
 function sendWecomAppMsg(corpId,agentId,secret,content){
-  // 先获取token（通过CORS代理）
-  var tokenUrl='https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid='+encodeURIComponent(corpId)+'&corpsecret='+encodeURIComponent(secret);
-  return fetch(CORS_PROXY+encodeURIComponent(tokenUrl)).then(function(r){return r.json()}).then(function(d){
-    if(d.errcode!==0||!d.access_token)throw new Error('Token获取失败: '+(d.errmsg||'unknown'));
+  // 直接拼目标URL，corsproxy.io会透传参数
+  var tokenUrl='https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid='+corpId+'&corpsecret='+secret;
+  return fetch('https://corsproxy.io/?'+encodeURIComponent(tokenUrl)).then(function(r){return r.json()}).then(function(d){
+    console.log('gettoken response:',JSON.stringify(d));
+    if(d.errcode!==0||!d.access_token)throw new Error('Token获取失败: '+(d.errmsg||'unknown')+' (errcode:'+d.errcode+')');
     var token=d.access_token;
-    // 发送消息（通过CORS代理）
     var sendUrl='https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token='+token;
-    return fetch(CORS_PROXY+encodeURIComponent(sendUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({touser:'@all',msgtype:'text',agentid:agentId,text:{content:content}})}).then(function(r){return r.json()}).then(function(d){return d.errcode===0});
+    return fetch('https://corsproxy.io/?'+encodeURIComponent(sendUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({touser:'@all',msgtype:'text',agentid:agentId,text:{content:content}})}).then(function(r){return r.json()}).then(function(d){console.log('send response:',JSON.stringify(d));return d.errcode===0});
   }).catch(function(e){console.error('WeCom error:',e);return false});
 }
 function notifyWecom(markdown,text){
