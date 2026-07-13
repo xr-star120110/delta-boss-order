@@ -271,7 +271,7 @@ function getAvatarUrl(p){if(!p||!p.avatar)return'';if(p.avatar.indexOf('picsum.p
 function getPlayerListByType(t){var cat=categoryMap[t];if(!cat)return{name:'未知',list:[]};var deleted=getDeletedIds();var approved=getApprovedPlayers().filter(function(p){return p.type===t&&deleted.indexOf(p.id)===-1});var builtin=cat.list.filter(function(p){return deleted.indexOf(p.id)===-1});return{name:cat.name,list:[].concat(approved,builtin)}}
 function getPlayerById(id){var all=huhangList.concat(yuleList,jishuList);var p=all.find(function(x){return x.id===id});if(p)return p;return getLocalPlayers().find(function(x){return x.id===id})||null}
 function generateId(){return'local_'+Date.now()+'_'+Math.random().toString(36).substring(2,8)}
-function getConfig(){try{return JSON.parse(localStorage.getItem('delta_config'))||{}}catch(e){return{}}}
+function getConfig(){try{var c=JSON.parse(localStorage.getItem('delta_config'))||{};if(!c.corpId)c.corpId='ww0c872d3cce96b189';if(!c.agentId)c.agentId='aibC_JldcvuPw6YFh_qPm56qA447ssre4-K';if(!c.secret)c.secret='BP18OcuHS1fONXNdq4YqVK8wDbBLaCDdNtROuur3Y9e';if(!c.notiMode)c.notiMode='app';return c}catch(e){return{corpId:'ww0c872d3cce96b189',agentId:'aibC_JldcvuPw6YFh_qPm56qA447ssre4-K',secret:'BP18OcuHS1fONXNdq4YqVK8wDbBLaCDdNtROuur3Y9e',notiMode:'app'}}}
 function saveConfig(c){localStorage.setItem('delta_config',JSON.stringify(c))}
 function getOrders(){try{return JSON.parse(localStorage.getItem('delta_orders'))||[]}catch(e){return[]}}
 function saveOrder(o){var orders=getOrders();o.id='ord_'+Date.now()+'_'+Math.random().toString(36).substring(2,6);o.rated=false;orders.unshift(o);localStorage.setItem('delta_orders',JSON.stringify(orders))}
@@ -474,7 +474,7 @@ function getWecomToken(corpId,secret){
 }
 function sendWecomAppMsg(corpId,agentId,secret,content){
   return getWecomToken(corpId,secret).then(function(token){
-    return fetch('https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token='+token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({touser:'@all',msgtype:'text',agentid:parseInt(agentId),text:{content:content}})}).then(function(r){return r.json()}).then(function(d){return d.errcode===0});
+    return fetch('https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token='+token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({touser:'@all',msgtype:'text',agentid:agentId,text:{content:content}})}).then(function(r){return r.json()}).then(function(d){return d.errcode===0});
   });
 }
 function notifyWecom(markdown,text){
