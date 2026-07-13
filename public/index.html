@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>三角洲 · 老板点单</title>
+<style>
+:root{--bg:#0a0e14;--card:rgba(20,26,36,0.92);--gold:#c9a96e;--gold-dim:rgba(201,169,110,0.15);--neon:#00e676;--neon-dim:rgba(0,230,118,0.08);--text:#e0e0e0;--text-dim:rgba(224,224,224,0.45);--radius:16px;--shadow:0 4px 24px rgba(0,0,0,0.5)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,230,118,0.015) 2px,rgba(0,230,118,0.015) 3px);pointer-events:none;z-index:0}
+.app{max-width:460px;margin:0 auto;min-height:100vh;position:relative;z-index:1;padding-bottom:40px}
+.glass{background:var(--card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--gold-dim);border-radius:var(--radius);box-shadow:var(--shadow)}
+.btn-gold{display:block;width:100%;background:linear-gradient(135deg,#c9a96e,#a6844a);color:#0a0e14;border:none;border-radius:10px;font-weight:700;font-size:17px;padding:14px 0;text-align:center;cursor:pointer;box-shadow:0 2px 16px rgba(201,169,110,0.3);transition:all .15s;letter-spacing:2px}
+.btn-gold:active{transform:scale(.97);opacity:.9}
+.btn-green{display:block;width:100%;background:linear-gradient(135deg,#00e676,#00c853);color:#0a0e14;border:none;border-radius:10px;font-weight:700;font-size:17px;padding:14px 0;text-align:center;cursor:pointer;transition:all .15s;letter-spacing:2px}
+.btn-green:active{transform:scale(.97);opacity:.9}
+.view{display:none}.view.active{display:block}
+.navbar{display:flex;align-items:center;padding:16px 20px;gap:12px;position:sticky;top:0;z-index:50;background:rgba(10,14,20,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--gold-dim)}
+.nav-back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--gold);cursor:pointer;border-radius:8px;border:1px solid var(--gold-dim);background:none;flex-shrink:0}
+.nav-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.nav-action{font-size:13px;color:var(--gold);cursor:pointer;padding:6px 12px;border:1px solid var(--gold-dim);border-radius:6px;background:none;white-space:nowrap}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.88);color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:999;pointer-events:none;opacity:0;transition:opacity .25s}
+.toast.show{opacity:1}
+
+/* HOME */
+.home-header{text-align:center;padding:60px 30px 40px;position:relative;overflow:hidden}
+.home-header::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(201,169,110,0.08),transparent 60%,rgba(0,230,118,0.03));pointer-events:none}
+.home-title{font-size:30px;font-weight:900;color:var(--gold);letter-spacing:6px;text-shadow:0 0 20px rgba(201,169,110,0.3);margin-bottom:6px;position:relative}
+.home-sub{font-size:12px;color:rgba(0,230,118,0.5);letter-spacing:10px;margin-bottom:20px;position:relative}
+.home-divider{display:flex;align-items:center;width:70%;margin:0 auto 16px;position:relative}
+.home-divider .line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.home-divider .icon{margin:0 12px;font-size:16px}
+.home-desc{font-size:13px;color:var(--text-dim);letter-spacing:3px;position:relative}
+.home-gear{position:absolute;top:16px;right:20px;font-size:22px;cursor:pointer;opacity:.4;z-index:5;transition:opacity .2s}
+.home-gear:hover{opacity:.8}
+.cat-list{padding:10px 20px 0}
+.cat-card{display:flex;align-items:center;padding:28px 20px;margin-bottom:20px;cursor:pointer;position:relative;transition:all .2s}
+.cat-card::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:linear-gradient(180deg,transparent,var(--gold),transparent);border-radius:2px}
+.cat-card:active{transform:scale(.98);border-color:rgba(201,169,110,0.4)}
+.cat-icon{width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:rgba(201,169,110,0.08);border-radius:16px;border:1px solid rgba(201,169,110,0.2);font-size:32px;margin-right:18px;flex-shrink:0}
+.cat-info{flex:1}.cat-name{font-size:19px;font-weight:700;color:var(--text);margin-bottom:4px}.cat-desc{font-size:13px;color:var(--text-dim)}.cat-arrow{color:rgba(201,169,110,0.4);font-size:14px;flex-shrink:0}
+.join-section{padding:0 20px 20px}.join-label{display:flex;align-items:center;margin-bottom:14px}.join-label .line{flex:1;height:1px;background:rgba(201,169,110,0.1)}.join-label .text{font-size:13px;color:rgba(0,230,118,0.5);letter-spacing:6px;margin:0 12px;white-space:nowrap}
+.join-card{display:flex;align-items:center;padding:26px 20px;cursor:pointer;position:relative;border-color:rgba(0,230,118,0.2)!important}
+.join-card::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:linear-gradient(180deg,transparent,var(--neon),transparent);border-radius:2px}
+.join-card:active{transform:scale(.98)}.join-icon-w{width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:rgba(0,230,118,0.06);border-radius:16px;border:1px solid rgba(0,230,118,0.2);font-size:32px;margin-right:18px;flex-shrink:0}
+.join-title{font-size:17px;font-weight:700;color:var(--neon);margin-bottom:4px}.join-desc{font-size:13px;color:var(--text-dim)}
+.footer-motto{padding:50px 20px;text-align:center}.footer-motto span{font-size:13px;color:rgba(224,224,224,0.2);letter-spacing:3px;font-style:italic}
+
+/* LIST */
+.stats-bar{display:flex;align-items:center;justify-content:center;gap:24px;padding:14px 20px;background:rgba(20,26,36,0.5);border-bottom:1px solid rgba(201,169,110,0.08);font-size:13px;color:var(--text-dim)}.stats-bar .num{color:var(--gold);font-weight:700;font-size:15px}.stats-bar .sep{width:1px;height:16px;background:rgba(201,169,110,0.2)}
+.search-wrap{padding:12px 16px 0;position:relative}.search-input{width:100%;height:42px;background:rgba(20,26,36,0.85);border:1px solid rgba(201,169,110,0.18);border-radius:10px;padding:0 40px 0 16px;font-size:14px;color:var(--text);outline:none;transition:border-color .2s}.search-input:focus{border-color:rgba(201,169,110,0.5);box-shadow:0 0 12px rgba(201,169,110,0.06)}.search-input::placeholder{color:rgba(224,224,224,0.2)}.search-icon{position:absolute;right:28px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;opacity:.35}.player-list{padding:12px 16px 0}
+.player-card{display:flex;align-items:center;padding:20px 16px;margin-bottom:14px;cursor:pointer;position:relative;transition:all .15s}
+.player-card:active{transform:scale(.985);border-color:rgba(0,230,118,0.25)}
+.player-card.busy-card{opacity:.55;cursor:not-allowed;border-color:rgba(255,152,0,0.1)!important}
+.player-card.busy-card::after{background:linear-gradient(180deg,transparent,#ff9800,transparent)!important}
+.player-card::after{content:'';position:absolute;left:0;top:12%;bottom:12%;width:2px;background:linear-gradient(180deg,transparent,var(--neon),transparent);opacity:.4}
+.p-avatar{width:64px;height:64px;border-radius:50%;border:2px solid rgba(201,169,110,0.35);margin-right:16px;flex-shrink:0;object-fit:cover;background:rgba(201,169,110,0.1)}
+.p-info{flex:1;min-width:0}.p-name-row{display:flex;align-items:center;margin-bottom:4px;gap:8px}.p-name{font-size:16px;font-weight:700;color:var(--text);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.p-honor{font-size:11px;color:var(--gold);background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.2);border-radius:4px;padding:1px 8px;white-space:nowrap}.p-stars{font-size:13px;letter-spacing:-1px;margin-bottom:4px}.p-rating{font-size:13px;font-weight:700;color:var(--gold);margin-left:4px}.p-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}.p-tag{font-size:11px;color:rgba(0,230,118,0.8);background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.15);border-radius:4px;padding:1px 8px}.p-review{font-size:12px;color:var(--text-dim);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.p-price-area{text-align:right;flex-shrink:0;margin-left:12px}.p-price{font-size:22px;font-weight:900;color:var(--gold)}.p-price small{font-size:12px;color:var(--text-dim);font-weight:400}.p-orders{font-size:11px;color:rgba(224,224,224,0.3);margin-top:2px}
+.load-more{padding:24px;text-align:center;font-size:13px;color:rgba(224,224,224,0.3);letter-spacing:3px}
+
+/* DETAIL */
+.detail{padding:0 16px}
+.profile-card{display:flex;flex-direction:column;align-items:center;padding:36px 24px 28px;margin:14px 0 18px}
+.d-avatar-wrap{position:relative;margin-bottom:16px}.d-avatar{width:100px;height:100px;border-radius:50%;border:3px solid rgba(201,169,110,0.4);object-fit:cover;background:rgba(201,169,110,0.1)}.avatar-ring{position:absolute;top:-6px;left:-6px;right:-6px;bottom:-6px;border-radius:50%;border:2px solid rgba(0,230,118,0.2);border-top-color:rgba(201,169,110,0.4);animation:ring 6s linear infinite}@keyframes ring{to{transform:rotate(360deg)}}
+.d-name-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}.d-name{font-size:22px;font-weight:900;color:var(--text);letter-spacing:3px}.d-honor{font-size:12px;color:var(--gold);background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);border-radius:6px;padding:2px 10px}.d-rating{display:flex;align-items:center;gap:8px;margin-bottom:16px}.d-stars{font-size:18px;letter-spacing:-1px}.d-rating-val{font-size:22px;font-weight:900;color:var(--gold)}.d-rating-label{font-size:12px;color:var(--text-dim)}.d-stats{display:flex;align-items:center;gap:40px;margin-bottom:16px}.d-stat{text-align:center}.d-stat-val{font-size:20px;font-weight:900;color:var(--gold)}.d-stat-label{font-size:12px;color:var(--text-dim);margin-top:2px}.d-stat-sep{width:1px;height:30px;background:rgba(201,169,110,0.15)}.d-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:18px}.d-tag{font-size:12px;color:rgba(0,230,118,0.8);background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.15);border-radius:6px;padding:4px 12px}.d-intro{width:100%;padding:14px;background:rgba(0,0,0,0.25);border-radius:10px;border:1px solid rgba(201,169,110,0.06)}.d-intro-title{font-size:14px;font-weight:700;color:var(--gold);display:block;margin-bottom:6px}.d-intro-text{font-size:14px;color:rgba(224,224,224,0.65);line-height:1.7}
+.reviews{margin-bottom:140px}.reviews-header{display:flex;align-items:center;justify-content:space-between;padding:0 4px 14px}.reviews-title{font-size:16px;font-weight:700;color:var(--text)}.reviews-count{font-size:13px;color:var(--text-dim)}.review-timeline{position:relative;padding-left:18px}.review-timeline::before{content:'';position:absolute;left:6px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,var(--gold),rgba(201,169,110,0.08))}.review-item{position:relative;padding:16px 14px 16px 20px;margin-bottom:10px}.timeline-dot{position:absolute;left:-14px;top:20px;width:8px;height:8px;background:var(--gold);border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 8px rgba(201,169,110,0.4)}.review-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}.review-user{font-size:14px;font-weight:700;color:var(--gold)}.review-score{font-size:11px}.review-text{font-size:14px;color:rgba(224,224,224,0.65);line-height:1.55}
+.bottom-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:460px;padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));background:linear-gradient(0deg,#0a0e14 0%,rgba(10,14,20,0.95) 80%,transparent);z-index:50}
+.bottom-bar .btn-gold{font-size:18px;letter-spacing:6px}
+
+/* ORDER PANEL */
+.panel-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:100;opacity:0;visibility:hidden;transition:all .25s}.panel-mask.show{opacity:1;visibility:visible}
+.order-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:460px;background:#141a24;border-radius:24px 24px 0 0;z-index:101;padding:0 20px 20px;padding-bottom:max(20px,env(safe-area-inset-bottom));max-height:85vh;overflow-y:auto;transition:transform .3s cubic-bezier(.32,.72,0,1)}.order-panel.show{transform:translateX(-50%) translateY(0)}
+.panel-handle{width:40px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;margin:12px auto 18px}.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.panel-title{font-size:18px;font-weight:700;color:var(--text)}.panel-close{font-size:22px;color:var(--text-dim);cursor:pointer;padding:4px}.panel-player{display:flex;align-items:center;margin-bottom:18px}.panel-av{width:48px;height:48px;border-radius:50%;margin-right:12px;border:2px solid rgba(201,169,110,0.3);object-fit:cover;background:rgba(201,169,110,0.1)}.panel-pname{font-size:15px;font-weight:700;color:var(--text)}.panel-phonor{font-size:12px;color:var(--gold);margin-top:2px}.panel-divider{height:1px;background:rgba(201,169,110,0.08);margin:18px 0}
+.opt-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}.opt-label{font-size:15px;color:var(--text);font-weight:500}
+.unit-switch{display:flex;background:rgba(0,0,0,0.3);border-radius:8px;overflow:hidden;border:1px solid rgba(201,169,110,0.12)}.unit-item{padding:8px 18px;font-size:13px;color:var(--text-dim);cursor:pointer;transition:all .15s}.unit-item.active{background:rgba(201,169,110,0.18);color:var(--gold);font-weight:700}
+.qty-ctrl{display:flex;align-items:center}.qty-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.2);font-size:18px;color:var(--gold);font-weight:700;cursor:pointer;user-select:none}.qty-btn:first-child{border-radius:8px 0 0 8px}.qty-btn:last-child{border-radius:0 8px 8px 0}.qty-btn.disabled{opacity:.3;pointer-events:none}.qty-val{width:50px;text-align:center;font-size:16px;font-weight:700;color:var(--text);border-top:1px solid rgba(201,169,110,0.2);border-bottom:1px solid rgba(201,169,110,0.2);line-height:32px}
+.phone-input{width:180px;text-align:right;font-size:15px;color:var(--text);padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:6px;border:1px solid rgba(201,169,110,0.12);outline:none}.phone-input:focus{border-color:rgba(201,169,110,0.5)}.phone-input::placeholder{color:rgba(224,224,224,0.25)}
+.total-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}.total-label{font-size:16px;color:var(--text)}.total-val{font-size:28px;font-weight:900;color:var(--neon);text-shadow:0 0 16px rgba(0,230,118,0.3)}
+
+/* CREATE */
+.create-header{padding:40px 24px 20px;text-align:center;border-bottom:1px solid rgba(201,169,110,0.08)}.create-title{font-size:24px;font-weight:900;color:var(--gold);letter-spacing:4px;display:block;margin-bottom:6px}.create-desc{font-size:13px;color:var(--text-dim);letter-spacing:2px}.form{padding:20px 20px 60px}.form-group{margin-bottom:22px}.form-label{font-size:15px;font-weight:600;color:var(--text);display:block;margin-bottom:8px}.form-label .req{color:#e74c3c}
+.form-input{width:100%;height:44px;background:rgba(20,26,36,0.8);border:1px solid rgba(201,169,110,0.12);border-radius:10px;padding:0 16px;font-size:15px;color:var(--text);outline:none;transition:border-color .2s}.form-input:focus{border-color:rgba(201,169,110,0.5);box-shadow:0 0 12px rgba(201,169,110,0.08)}
+.form-textarea{width:100%;min-height:100px;background:rgba(20,26,36,0.8);border:1px solid rgba(201,169,110,0.12);border-radius:10px;padding:12px 16px;font-size:15px;color:var(--text);outline:none;resize:vertical;line-height:1.6;font-family:inherit}.form-textarea:focus{border-color:rgba(201,169,110,0.5)}
+.price-row{display:flex;align-items:center;background:rgba(20,26,36,0.8);border:1px solid rgba(201,169,110,0.12);border-radius:10px;overflow:hidden}.price-row .yen{font-size:18px;font-weight:700;color:var(--gold);padding-left:16px}.price-row input{border:none!important;background:transparent!important;flex:1}.price-row .unit-label{font-size:13px;color:var(--text-dim);padding-right:16px}
+.type-options{display:flex;gap:12px}.type-opt{flex:1;display:flex;flex-direction:column;align-items:center;padding:16px 8px;background:rgba(20,26,36,0.8);border:2px solid rgba(201,169,110,0.1);border-radius:12px;cursor:pointer;transition:all .15s}.type-opt.active{border-color:var(--gold);background:rgba(201,169,110,0.08)}.type-opt:active{transform:scale(.95)}.type-opt .icon{font-size:28px;margin-bottom:4px}.type-opt .label{font-size:13px;color:var(--text-dim)}.type-opt.active .label{color:var(--gold);font-weight:700}
+.unit-toggle{display:flex;background:rgba(20,26,36,0.8);border-radius:10px;overflow:hidden;border:1px solid rgba(201,169,110,0.1);width:fit-content}.unit-toggle .unit-item{padding:10px 24px;font-size:14px;color:var(--text-dim);cursor:pointer}.unit-toggle .unit-item.active{background:rgba(201,169,110,0.15);color:var(--gold);font-weight:700}
+.tag-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.tag-chip{font-size:12px;color:rgba(0,230,118,0.8);background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.15);border-radius:6px;padding:3px 12px}
+.avatar-upload{display:flex;align-items:center;justify-content:center;cursor:pointer}.avatar-placeholder{width:80px;height:80px;border-radius:50%;border:2px dashed rgba(201,169,110,0.25);display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(20,26,36,0.6);transition:all .15s}.avatar-placeholder:active{border-color:var(--gold)}.avatar-placeholder .icon{font-size:28px;margin-bottom:2px}.avatar-placeholder .text{font-size:11px;color:var(--text-dim)}.avatar-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid rgba(201,169,110,0.3);display:none}
+.submit-area{padding:20px 0;text-align:center}.submit-tip{font-size:12px;color:rgba(224,224,224,0.2);margin-top:12px;letter-spacing:2px}
+
+/* SETTINGS */
+.settings-section{margin-bottom:28px}.settings-section h3{font-size:16px;font-weight:700;color:var(--gold);margin-bottom:14px;letter-spacing:2px;padding-bottom:8px;border-bottom:1px solid rgba(201,169,110,0.1)}.settings-hint{font-size:12px;color:var(--text-dim);margin-top:8px;line-height:1.6;padding:10px;background:rgba(0,0,0,0.2);border-radius:8px}
+.settings-hint strong{color:var(--neon)}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}.status-dot.green{background:var(--neon);box-shadow:0 0 6px rgba(0,230,118,0.5)}.status-dot.gray{background:rgba(255,255,255,0.2)}
+.test-btn{font-size:13px;color:var(--neon);cursor:pointer;padding:6px 14px;border:1px solid rgba(0,230,118,0.3);border-radius:6px;background:none;margin-top:8px;display:inline-block}
+
+/* ADMIN */
+.admin-tab{flex:1;padding:10px 0;text-align:center;font-size:14px;font-weight:600;background:rgba(20,26,36,0.6);border:1px solid rgba(201,169,110,0.12);border-radius:10px;color:var(--text-dim);cursor:pointer;transition:all .15s;position:relative}
+.admin-tab.active{background:rgba(201,169,110,0.12);color:var(--gold);border-color:rgba(201,169,110,0.3)}
+.tab-badge{display:inline-block;background:#e74c3c;color:#fff;font-size:11px;min-width:18px;height:18px;line-height:18px;border-radius:9px;padding:0 5px;margin-left:4px}
+.review-item-box{padding:16px;margin-bottom:12px}
+.review-player-info{display:flex;align-items:center;margin-bottom:12px;gap:12px}
+.review-avatar{width:48px;height:48px;border-radius:50%;border:2px solid rgba(201,169,110,0.3);object-fit:cover;background:rgba(201,169,110,0.1);flex-shrink:0}
+.review-meta{flex:1}.review-meta-name{font-size:16px;font-weight:700;color:var(--text)}.review-meta-detail{font-size:12px;color:var(--text-dim);margin-top:4px}
+.review-tags-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.review-intro-text{font-size:13px;color:rgba(224,224,224,0.6);line-height:1.5;margin-bottom:12px}
+.review-btns{display:flex;gap:10px}
+.review-btn{flex:1;padding:10px 0;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.review-btn:active{transform:scale(.96)}
+.review-btn.approve{background:linear-gradient(135deg,#00e676,#00c853);color:#0a0e14}
+.review-btn.reject{background:rgba(231,76,60,0.15);color:#e74c3c;border:1px solid rgba(231,76,60,0.3)}
+.review-status{display:inline-block;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600}
+.review-status.approved{background:rgba(0,230,118,0.12);color:var(--neon)}
+.review-status.rejected{background:rgba(231,76,60,0.12);color:#e74c3c}
+.admin-stats{display:flex;gap:12px;padding:16px 20px}.admin-stat{flex:1;padding:16px;text-align:center;border-radius:12px;background:var(--card);border:1px solid var(--gold-dim)}.admin-stat-val{font-size:24px;font-weight:900;color:var(--gold)}.admin-stat-label{font-size:12px;color:var(--text-dim);margin-top:4px}
+.order-list-panel{padding:0 16px}
+.order-item{padding:16px;margin-bottom:12px}.order-item-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.order-player-name{font-size:16px;font-weight:700;color:var(--gold)}.order-time{font-size:12px;color:var(--text-dim)}.order-detail-row{display:flex;gap:16px;font-size:13px;color:var(--text-dim);margin-bottom:4px}.order-detail-row span{color:var(--text)}.order-phone{font-size:14px;color:var(--neon);font-weight:600}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-dim);font-size:15px}.empty-state .icon{font-size:48px;display:block;margin-bottom:12px}
+.refresh-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px}.refresh-btn{font-size:13px;color:var(--gold);cursor:pointer;padding:6px 14px;border:1px solid var(--gold-dim);border-radius:6px;background:none}
+.admin-login-box{max-width:300px;margin:80px auto;text-align:center;padding:30px}.admin-login-box h2{font-size:20px;color:var(--gold);margin-bottom:20px;letter-spacing:4px}
+
+/* MODAL */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:all .2s}.modal-overlay.show{opacity:1;visibility:visible}
+.modal-box{background:#1a2230;border:1px solid rgba(201,169,110,0.2);border-radius:16px;padding:28px 24px 20px;width:85%;max-width:340px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.6)}.modal-icon{font-size:40px;margin-bottom:12px}.modal-msg{font-size:16px;color:var(--text);margin-bottom:6px;line-height:1.5}.modal-sub{font-size:13px;color:var(--text-dim);margin-bottom:20px;line-height:1.4}.modal-btns{display:flex;gap:12px}.modal-btn{flex:1;padding:12px 0;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:all .15s}.modal-btn:active{transform:scale(.96)}.modal-btn.cancel{background:rgba(255,255,255,0.08);color:var(--text-dim)}.modal-btn.confirm{background:linear-gradient(135deg,#c9a96e,#a6844a);color:#0a0e14}
+	/* MY ORDERS */
+	.order-card{padding:18px;margin-bottom:12px}.order-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.order-card-player{font-size:16px;font-weight:700;color:var(--gold)}.order-card-time{font-size:12px;color:var(--text-dim)}.order-card-body{font-size:14px;color:var(--text-dim);margin-bottom:10px}.order-card-body .val{color:var(--text);font-weight:600}.order-card-phone{color:var(--neon);font-weight:600}.order-card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(201,169,110,0.08)}.order-rated{font-size:13px;color:var(--neon)}.rate-btn{font-size:13px;color:var(--gold);cursor:pointer;padding:6px 16px;border:1px solid var(--gold);border-radius:8px;background:rgba(201,169,110,0.08);transition:all .15s}.rate-btn:active{transform:scale(.95)}
+	.rate-stars{display:flex;gap:6px;justify-content:center;margin-bottom:14px}.rate-star{font-size:32px;cursor:pointer;transition:all .12s;filter:grayscale(1);opacity:.4}.rate-star.sel{filter:none;opacity:1;transform:scale(1.1)}.rate-textarea{width:100%;min-height:80px;background:rgba(0,0,0,0.3);border:1px solid rgba(201,169,110,0.15);border-radius:10px;padding:12px;font-size:14px;color:var(--text);outline:none;resize:vertical;font-family:inherit;margin-bottom:14px}.rate-textarea:focus{border-color:rgba(201,169,110,0.5)}.rate-textarea::placeholder{color:rgba(224,224,224,0.2)}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+<div class="toast" id="toast"></div>
+
+<!-- HOME -->
+<div class="view active" id="view-home">
+  <div class="home-gear" onclick="navTo('settings')">⚙️</div>
+  <div class="home-header">
+    <div class="home-title">三角洲 · 老板点单</div>
+    <div class="home-sub">DELTA FORCE · BOSS ORDER</div>
+    <div class="home-divider"><div class="line"></div><div class="icon">⚔️</div><div class="line"></div></div>
+    <div class="home-desc">选择你的专属战士，开启胜利之旅</div>
+  </div>
+  <div class="cat-list" id="catList"></div>
+  <div style="padding:0 20px 12px">
+    <div class="join-card glass" onclick="navTo('orders')" style="border-color:rgba(201,169,110,0.15)!important">
+      <div class="join-icon-w" style="background:rgba(201,169,110,0.06);border-color:rgba(201,169,110,0.2)">📋</div>
+      <div class="cat-info"><div class="join-title" style="color:var(--gold)">我的订单</div><div class="join-desc">查看历史订单，评价陪玩服务</div></div>
+      <div class="cat-arrow">▶</div>
+    </div>
+  </div>
+  <div class="join-section">
+    <div class="join-label"><div class="line"></div><div class="text">打 手 入 驻</div><div class="line"></div></div>
+    <div class="join-card glass" onclick="navTo('create')">
+      <div class="join-icon-w">🎖️</div>
+      <div class="cat-info"><div class="join-title">我是打手，申请入驻</div><div class="join-desc">创建你的专属名片，让更多老板找到你</div></div>
+      <div class="cat-arrow">▶</div>
+    </div>
+  </div>
+  <div class="footer-motto"><span>「 每一场战斗，都值得认真对待 」</span></div>
+</div>
+
+<!-- LIST -->
+<div class="view" id="view-list">
+  <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title" id="listTitle"></div></div>
+  <div class="search-wrap"><input class="search-input" id="searchInput" placeholder="搜索名字、标签、勋章..." oninput="onSearch()"><span class="search-icon">🔍</span></div>
+  <div class="stats-bar" id="statsBar"></div>
+  <div class="player-list" id="playerList"></div>
+  <div class="load-more" id="loadMore">— 全部战士已就位 —</div>
+</div>
+
+<!-- DETAIL -->
+<div class="view" id="view-detail">
+  <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title" id="detailTitle"></div></div>
+  <div class="detail" id="detailContent"></div>
+  <div class="bottom-bar"><button class="btn-gold" onclick="openOrderPanel()">⚡ 立 即 下 单</button></div>
+</div>
+
+<!-- CREATE -->
+<div class="view" id="view-create">
+  <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title">打手入驻</div></div>
+  <div class="create-header"><span class="create-title">创建你的专属名片</span><span class="create-desc">填写信息，让老板们找到你</span></div>
+  <div class="form" id="createForm"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="view" id="view-settings">
+  <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title">系统设置</div></div>
+  <div style="padding:20px">
+    <div class="settings-section">
+      <h3>📢 企业微信群机器人通知</h3>
+      <div class="form-group">
+        <label class="form-label">Webhook 地址</label>
+        <input class="form-input" id="sWebhook" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=...">
+      </div>
+      <div class="settings-hint">
+        <strong>怎么获取？</strong><br>
+        1. 打开企业微信群 → 右上角 <strong>···</strong> → <strong>群机器人</strong><br>
+        2. 添加机器人 → 复制 <strong>Webhook 地址</strong><br>
+        3. 粘贴到上方 → 点下方「保存并测试」
+      </div>
+      <button class="test-btn" onclick="testWebhook()">🧪 发送测试消息</button>
+    </div>
+    <div class="settings-section">
+      <h3>🔐 管理后台</h3>
+      <div class="form-group">
+        <label class="form-label">管理密码</label>
+        <input class="form-input" id="sAdminPwd" type="password" placeholder="默认: 123456">
+      </div>
+    </div>
+    <button class="btn-gold" onclick="saveSettings()" style="margin-bottom:12px">💾 保存设置</button>
+    <button class="btn-green" onclick="navTo('admin')">📊 进入管理后台</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="view" id="view-admin">
+  <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title">📊 管理后台</div></div>
+  <div class="admin-login-box" id="adminLoginBox">
+    <h2>🔐 管理员验证</h2>
+    <div class="form-group"><input class="form-input" id="adminPwdInput" type="password" placeholder="请输入管理密码"></div>
+    <button class="btn-gold" onclick="adminLogin()">验证进入</button>
+  </div>
+  <div id="adminContent" style="display:none">
+    <div style="display:flex;padding:12px 20px;gap:10px">
+      <button class="admin-tab active" id="tabOrders" onclick="switchAdminTab('orders')">📋 订单</button>
+      <button class="admin-tab" id="tabReview" onclick="switchAdminTab('review')">🔍 审核 <span class="tab-badge" id="reviewBadge">0</span></button>
+      <button class="admin-tab" id="tabPlayers" onclick="switchAdminTab('players')">👥 打手</button>
+    </div>
+    <div id="panelOrders"><div class="admin-stats" id="adminStats"></div><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)">订单记录</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="orderListPanel"></div></div>
+    <div id="panelReview" style="display:none"><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)">待审核打手</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="reviewListPanel"></div></div>
+    <div id="panelPlayers" style="display:none"><div class="refresh-bar"><span style="font-size:13px;color:var(--text-dim)" id="playerCountLabel">全部打手</span><button class="refresh-btn" onclick="refreshAdmin()">🔄 刷新</button></div><div class="order-list-panel" id="playerManageList"></div></div>
+  </div>
+</div>
+
+<!-- MY ORDERS -->
+<div class="view" id="view-orders">
+  <div class="navbar"><button class="nav-back" onclick="navBack()">‹</button><div class="nav-title">📋 我的订单</div></div>
+  <div style="padding:16px" id="ordersContent"></div>
+</div>
+
+<!-- Order Panel -->
+<div class="panel-mask" id="panelMask" onclick="closeOrderPanel()"></div>
+<div class="order-panel" id="orderPanel">
+  <div class="panel-handle"></div>
+  <div class="panel-head"><div class="panel-title">确认订单</div><div class="panel-close" onclick="closeOrderPanel()">✕</div></div>
+  <div id="panelPlayerInfo"></div>
+  <div class="panel-divider"></div>
+  <div class="opt-row"><span class="opt-label">服务单位</span><div class="unit-switch" id="unitSwitch"></div></div>
+  <div class="opt-row"><span class="opt-label">数量</span><div class="qty-ctrl"><div class="qty-btn" onclick="changeQty(-1)">−</div><div class="qty-val" id="qtyVal">1</div><div class="qty-btn" onclick="changeQty(1)">+</div></div></div>
+  <div class="opt-row"><span class="opt-label">联系电话</span><input class="phone-input" type="tel" maxlength="11" placeholder="请输入手机号" id="phoneInput"></div>
+  <div class="panel-divider"></div>
+  <div class="total-row"><span class="total-label">订单总额</span><span class="total-val" id="totalPrice">¥0</span></div>
+  <button class="btn-gold" onclick="confirmOrder()">确认下单</button>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box"><div class="modal-icon" id="modalIcon"></div><div class="modal-msg" id="modalMsg"></div><div class="modal-sub" id="modalSub"></div><div class="modal-btns" id="modalBtns"></div></div>
+</div>
+</div>
+
+<script>
+// ==================== DATA ====================
+var huhangList=[{id:'h001',avatar:'https://picsum.photos/200?random=1',nickname:'影子先锋',price:50,unit:'小时',orderCount:2386,rating:4.9,tags:['战术大师','零失误','全局指挥'],honor:'🏅 王牌护航员',intro:'前特种部队退役，三角洲行动S1赛季传奇段位。擅长全地图战术规划，护航成功率99.2%，是老板们最信赖的撤离保障。',reviews:[{userName:'老板阿强',content:'太稳了，带我从青铜打到钻石，一次都没翻车！',score:5.0},{userName:'老板小李',content:'声音沉稳，指挥清晰，跟着他就感觉特别安全。',score:4.9},{userName:'老板大壮',content:'连赢五把，影子哥的战术意识真的顶级。',score:4.8},{userName:'老板飞哥',content:'第一次找护航就遇到这么靠谱的，以后就认准影子先锋了。',score:4.9}]},{id:'h002',avatar:'https://picsum.photos/200?random=2',nickname:'暗夜猎手',price:45,unit:'小时',orderCount:1856,rating:4.7,tags:['枪刚','反应快','单兵作战'],honor:'💎 百场零失误',intro:'FPS游戏老炮，三角洲行动内测玩家。枪法精准，单兵作战能力极强，一打三不在话下。',reviews:[{userName:'老板阿飞',content:'枪法真的刚，一穿三看得我目瞪口呆。',score:4.8},{userName:'老板小美',content:'速度快效率高，就是话不多，比较严肃。',score:4.5},{userName:'老板大刘',content:'带我十连胜，暗夜猎手名不虚传。',score:4.7}]},{id:'h003',avatar:'https://picsum.photos/200?random=3',nickname:'暴风战鹰',price:55,unit:'小时',orderCount:3201,rating:5.0,tags:['全能型','耐心教学','人气王'],honor:'👑 人气护航王',intro:'三角洲行动头部主播，全网粉丝50万+。护航风格稳健又不失激进，擅长根据老板水平调整策略。',reviews:[{userName:'老板老王',content:'主播级体验，又强又会教，五星好评！',score:5.0},{userName:'老板小陈',content:'人气这么高是有原因的，确实强，脾气也好。',score:5.0},{userName:'老板阿杰',content:'边打边讲解，学了不少东西。',score:5.0}]},{id:'h004',avatar:'https://picsum.photos/200?random=4',nickname:'铁壁堡垒',price:40,unit:'局',orderCount:956,rating:4.6,tags:['防守专家','稳扎稳打','新人友好'],honor:'🛡️ 防守铁卫',intro:'专精防守点位，擅长为老板创造安全输出环境。新人老板的最佳选择，耐心讲解每个细节。',reviews:[{userName:'老板新手',content:'作为纯新手，铁壁哥讲得特别细致，体验很好。',score:4.7},{userName:'老板小胖',content:'防守是真的稳，就是有时候太保守了。',score:4.5},{userName:'老板大熊',content:'稳中求胜，适合我这种不喜欢冒险的老板。',score:4.6}]},{id:'h005',avatar:'https://picsum.photos/200?random=5',nickname:'幽灵刺客',price:60,unit:'小时',orderCount:4102,rating:4.9,tags:['潜行专家','高爆发','闪电战'],honor:'🏆 赛季MVP',intro:'三角洲行动竞技榜常年前十，擅长闪电突袭战术。快速清图，让老板体验飞一般的感觉。',reviews:[{userName:'老板疾风',content:'快准狠，10分钟一局，效率拉满！',score:5.0},{userName:'老板闪电',content:'幽灵的打法太飘逸了，看得我眼花缭乱。',score:4.9},{userName:'老板小虎',content:'贵是贵了点，但值这个价。',score:4.8}]},{id:'h006',avatar:'https://picsum.photos/200?random=6',nickname:'钢铁洪流',price:35,unit:'局',orderCount:723,rating:4.5,tags:['重装专家','正面突破','硬刚型'],honor:'💪 钢铁先锋',intro:'重装爱好者，喜欢正面硬刚。带老板体验什么叫真正的火力压制，不服就干。',reviews:[{userName:'老板硬汉',content:'正面硬刚太爽了，钢铁哥枪管子都打红了。',score:4.6},{userName:'老板小武',content:'适合喜欢刚枪的老板，就是偶尔会翻车哈哈。',score:4.3},{userName:'老板大炮',content:'火力确实猛，但希望有时候能稳一点。',score:4.5}]},{id:'h007',avatar:'https://picsum.photos/200?random=7',nickname:'夜鹰指挥官',price:48,unit:'小时',orderCount:1567,rating:4.8,tags:['战略大师','团队配合','信息为王'],honor:'🎖️ 战术之星',intro:'前战队指挥，擅长信息收集和团队调度。每一局都是一场精心策划的军事行动。',reviews:[{userName:'老板军师',content:'指挥官级别的体验，每个决策都有理有据。',score:4.9},{userName:'老板小兵',content:'学到了很多战术知识，不只是被带飞。',score:4.7},{userName:'老板老张',content:'专业的队伍就该这样，信息共享做得很好。',score:4.8}]},{id:'h008',avatar:'https://picsum.photos/200?random=8',nickname:'闪电突袭',price:42,unit:'小时',orderCount:2103,rating:4.7,tags:['速推流','高效刷分','极限操作'],honor:'⚡ 速通之王',intro:'专注速通刷分，每一分钟都不浪费。适合想要快速冲分的老板，效率即正义。',reviews:[{userName:'老板刷分',content:'一小时刷了平时三小时的量，效率惊人。',score:4.8},{userName:'老板急急',content:'急性子福音，不拖泥带水，干净利落。',score:4.6},{userName:'老板冲冲',content:'速推还会讲解关键点，不是纯带飞。',score:4.7}]},{id:'h009',avatar:'https://picsum.photos/200?random=9',nickname:'寒刃孤狼',price:52,unit:'小时',orderCount:1890,rating:4.8,tags:['独狼打法','极限翻盘','狙击专家'],honor:'🎯 狙神认证',intro:'顶级狙击手，千米之外取敌首级。一人一狙可定胜负，翻盘能力极强。',reviews:[{userName:'老板远望',content:'狙击枪玩得出神入化，一枪一个小朋友。',score:4.9},{userName:'老板狙击',content:'好几次以为要输了，寒刃一狙翻盘。',score:4.8},{userName:'老板小龙',content:'虽然语言不多，但枪法就是最好的交流。',score:4.7}]}];
+var yuleList=[{id:'y001',avatar:'https://picsum.photos/200?random=11',nickname:'甜心狙击',price:30,unit:'小时',orderCount:5201,rating:4.8,tags:['话多有趣','气氛组','治愈系'],honor:'🌟 人气之星',intro:'声音甜美，聊天鬼才。不仅能带你上分，更能让你在游戏中忘记烦恼，体验真正的快乐游戏。',reviews:[{userName:'老板开心',content:'打游戏还能听相声，太欢乐了哈哈哈！',score:4.9},{userName:'老板轻松',content:'上了一天班累得要死，和甜心打几把直接满血复活。',score:4.8},{userName:'老板快乐',content:'不只是陪玩，简直是兼职心理医生。',score:4.7}]},{id:'y002',avatar:'https://picsum.photos/200?random=12',nickname:'战场段子手',price:28,unit:'小时',orderCount:4320,rating:4.6,tags:['段子手','东北话','整活王'],honor:'😂 欢乐制造机',intro:'东北老铁，自带喜感。战场上的每一秒都是相声现场，让你笑着就把分上了。',reviews:[{userName:'老板笑死',content:'笑得我枪都端不稳了，东北话太有感染力。',score:4.7},{userName:'老板东北',content:'老乡见老乡，两眼泪汪汪，但这眼泪是笑出来的。',score:4.6},{userName:'老板南方',content:'第一次听东北人打游戏，太魔性了。',score:4.5}]},{id:'y003',avatar:'https://picsum.photos/200?random=13',nickname:'蜜桃汽水',price:35,unit:'小时',orderCount:3890,rating:4.9,tags:['少女音','温柔耐心','萌新之友'],honor:'🍑 甜蜜担当',intro:'温柔少女音，对萌新老板超级友好。不催不赶，陪你慢慢探索三角洲的每一个角落。',reviews:[{userName:'老板新手',content:'第一次玩FPS，蜜桃特别耐心，感动哭了。',score:5.0},{userName:'老板大叔',content:'虽然我反应慢，但蜜桃从不嫌弃。',score:4.9},{userName:'老板菜鸟',content:'声音太好听了，听着就让人放松。',score:4.8}]},{id:'y004',avatar:'https://picsum.photos/200?random=14',nickname:'摇滚战士',price:32,unit:'小时',orderCount:2678,rating:4.5,tags:['摇滚青年','激情拉满','燃系打法'],honor:'🎸 燃系代言人',intro:'摇滚乐爱好者，边打游戏边放摇滚。激情四射的打法，让你肾上腺素飙升。',reviews:[{userName:'老板摇滚',content:'背景音乐配合枪声，太燃了！',score:4.6},{userName:'老板燃尽',content:'适合想发泄的老板，激情报点让人上头。',score:4.5},{userName:'老板安静',content:'激情是激情，但背景音乐确实有点吵。',score:4.3}]},{id:'y005',avatar:'https://picsum.photos/200?random=15',nickname:'深海之声',price:33,unit:'小时',orderCount:3156,rating:4.7,tags:['低音炮','磁性嗓音','治愈聊天'],honor:'🎙️ 声优级陪玩',intro:'声优级低音炮，一开口就是电台质感。陪你聊天解压，顺便上上分。',reviews:[{userName:'老板声控',content:'这个声音绝了，可以录下来当闹钟吗？',score:4.8},{userName:'老板失眠',content:'打完游戏好睡觉，声音太有安全感了。',score:4.7},{userName:'老板声优',content:'以为是来打游戏的，结果是来听声音的。',score:4.6}]},{id:'y006',avatar:'https://picsum.photos/200?random=16',nickname:'奶茶杀手',price:25,unit:'局',orderCount:6540,rating:4.4,tags:['话痨','奶茶控','佛系打分'],honor:'🧋 奶茶代言人',intro:'一边喝奶茶一边打游戏，佛系随缘。输赢不重要，开心最重要。',reviews:[{userName:'老板佛系',content:'佛系陪玩，输了也不生气，心态超好。',score:4.5},{userName:'老板奶茶',content:'我已经跟着他喝了半个月奶茶了。',score:4.3},{userName:'老板随缘',content:'轻松愉快，适合休闲娱乐。',score:4.4}]},{id:'y007',avatar:'https://picsum.photos/200?random=17',nickname:'猫系陪玩',price:38,unit:'小时',orderCount:2870,rating:4.9,tags:['傲娇属性','实力派','反差萌'],honor:'🐱 反差萌王',intro:'表面高冷傲娇，实际超级宠老板。枪法犀利但说话软萌，反差感拉满。',reviews:[{userName:'老板猫奴',content:'被傲娇到了，但确实强得没话说。',score:5.0},{userName:'老板汪星',content:'实力与可爱并存，这谁顶得住啊。',score:4.9},{userName:'老板阿喵',content:'表面说"一般般啦"，手底下全是对面的人头。',score:4.8}]},{id:'y008',avatar:'https://picsum.photos/200?random=18',nickname:'派对之王',price:30,unit:'小时',orderCount:4321,rating:4.7,tags:['气氛担当','团建首选','全能选手'],honor:'🎉 派对达人',intro:'团建/派对首选陪玩！自带BGM和气氛，一个人就是一个综艺节目。',reviews:[{userName:'老板团建',content:'公司团建找他带我们五黑，气氛直接拉满！',score:4.8},{userName:'老板开心果',content:'一个人撑起整个队伍的氛围。',score:4.7},{userName:'老板聚会',content:'朋友聚会必点，比KTV好玩多了。',score:4.6}]},{id:'y009',avatar:'https://picsum.photos/200?random=19',nickname:'暴走萝莉',price:35,unit:'小时',orderCount:3560,rating:4.6,tags:['萝莉音','暴走打法','惊喜不断'],honor:'🎀 最萌反差',intro:'萝莉音配暴走打法，你以为她是小可爱，上了战场她比谁都猛。',reviews:[{userName:'老板震惊',content:'听到萝莉音还以为点错了，结果她一个人杀穿了对面。',score:4.7},{userName:'老板反差',content:'这反差也太大了，粉了粉了。',score:4.6},{userName:'老板萌新',content:'萝莉姐姐带飞，感觉自己在看动漫。',score:4.5}]}];
+var jishuList=[{id:'j001',avatar:'https://picsum.photos/200?random=21',nickname:'战术教授',price:60,unit:'小时',orderCount:1890,rating:4.9,tags:['学院派','系统教学','复盘专家'],honor:'🎓 金牌教练',intro:'前CS职业选手，现三角洲行动战术分析师。系统化教学方法，从基础到进阶，让你每一把都有进步。',reviews:[{userName:'老板学霸',content:'上了五节课，KD从0.5飙到2.0，教授真传！',score:5.0},{userName:'老板学生',content:'每节课都有复盘笔记，学得明明白白。',score:4.9},{userName:'老板认真',content:'系统化的教学，比网上那些零散教程强太多了。',score:4.8}]},{id:'j002',avatar:'https://picsum.photos/200?random=22',nickname:'枪械大师',price:55,unit:'小时',orderCount:2340,rating:4.8,tags:['全枪械精通','压枪教学','配件搭配'],honor:'🔫 武器专家',intro:'精通三角洲行动全部枪械，对配件搭配有深入研究。教你找到最适合自己的武器配置。',reviews:[{userName:'老板枪迷',content:'大师配的枪真的不一样，手感翻倍！',score:4.9},{userName:'老板配件',content:'以前乱装配件，现在知道每一件的作用了。',score:4.7},{userName:'老板压枪',content:'压枪教学太实用了，从描边变成收割。',score:4.8}]},{id:'j003',avatar:'https://picsum.photos/200?random=23',nickname:'地图行者',price:50,unit:'小时',orderCount:1560,rating:4.7,tags:['地图全掌握','点位分析','路线规划'],honor:'🗺️ 活地图',intro:'对三角洲全地图倒背如流，每个角落的战术价值了如指掌。教你如何利用地形优势取胜。',reviews:[{userName:'老板路痴',content:'终于不再迷路了，地图行者名不虚传。',score:4.8},{userName:'老板地图',content:'学完才知道自己以前有多瞎打。',score:4.6},{userName:'老版点位',content:'每个点位讲解都很细致，实操性强。',score:4.7}]},{id:'j004',avatar:'https://picsum.photos/200?random=24',nickname:'反应特训官',price:45,unit:'小时',orderCount:980,rating:4.5,tags:['反应训练','手眼协调','基础打磨'],honor:'⚡ 反应力教练',intro:'专注基础能力提升，通过科学训练方法提高反应速度和瞄准精度。适合想要突破瓶颈的玩家。',reviews:[{userName:'老板瓶颈',content:'卡在黄金上不去，特训两周直接上钻石。',score:4.6},{userName:'老板手残',content:'以前以为是自己手残，原来只是没练对。',score:4.5},{userName:'老板进步',content:'训练方法很科学，进步肉眼可见。',score:4.4}]},{id:'j005',avatar:'https://picsum.photos/200?random=25',nickname:'战术分析师',price:65,unit:'小时',orderCount:1230,rating:5.0,tags:['专业复盘','数据驱动','职业级'],honor:'📊 数据大师',intro:'用数据说话，每一局都有详细的数据分析报告。职业级别的复盘能力，帮你找到最细微的问题。',reviews:[{userName:'老板数据',content:'每局结束都有数据分析，专业得像个教练团队。',score:5.0},{userName:'老板职业',content:'冲着职业化体验来的，超出预期。',score:5.0},{userName:'老板分析师',content:'自己也是做分析的，这水平确实专业。',score:5.0}]},{id:'j006',avatar:'https://picsum.photos/200?random=26',nickname:'突击教官',price:48,unit:'小时',orderCount:2780,rating:4.6,tags:['进攻战术','突破技巧','实战演练'],honor:'🎯 进攻先锋',intro:'专注进攻端教学，各种突破路线和进攻时机把控。教你做战场上最锋利的刀。',reviews:[{userName:'老板进攻',content:'学会进攻节奏后，游戏体验完全不一样了。',score:4.7},{userName:'老板突击',content:'以前总是缩着打，现在敢冲了。',score:4.5},{userName:'老板冲锋',content:'教官说冲就冲，赢多输少。',score:4.6}]},{id:'j007',avatar:'https://picsum.photos/200?random=27',nickname:'意识流导师',price:55,unit:'小时',orderCount:1450,rating:4.8,tags:['游戏意识','预判训练','大局观'],honor:'🧠 意识天花板',intro:'枪法可以练，意识需要悟。帮你建立顶级的游戏意识，预判敌人的每一步。',reviews:[{userName:'老板顿悟',content:'感觉自己突然开窍了，原来意识这么重要。',score:4.9},{userName:'老板觉醒',content:'导师一句话"对面这时候肯定在B点"，然后真的在。',score:4.8},{userName:'老板开挂',content:'我队友以为我开挂了，其实只是意识提高了。',score:4.7}]},{id:'j008',avatar:'https://picsum.photos/200?random=28',nickname:'全能特训官',price:58,unit:'小时',orderCount:2100,rating:4.7,tags:['综合训练','定制计划','阶段提升'],honor:'📋 训练规划师',intro:'根据你的当前水平定制专属训练计划。从枪法到意识再到战术，全面打磨。',reviews:[{userName:'老板定制',content:'量身定做的训练计划，每个阶段目标明确。',score:4.8},{userName:'老板计划',content:'按计划练了两周，感觉像是换了一个人。',score:4.7},{userName:'老板全面',content:'全面提升，没有短板才是真的强。',score:4.6}]},{id:'j009',avatar:'https://picsum.photos/200?random=29',nickname:'残局之王',price:52,unit:'小时',orderCount:1670,rating:4.8,tags:['残局处理','心理素质','以一敌多'],honor:'♟️ 残局大师',intro:'专精残局处理，1vN是家常便饭。教你如何在绝境中保持冷静，完成不可能的翻盘。',reviews:[{userName:'老板翻盘',content:'学了三节课，自己也能打1v3了。',score:4.9},{userName:'老板绝境',content:'残局的思路太清晰了，每发子弹都有目的。',score:4.8},{userName:'老板冷静',content:'最大的收获是学会了在残局不慌。',score:4.7}]}];
+var categoryMap={huhang:{name:'护航陪玩',icon:'🛡️',desc:'专业护航，保障撤离',list:huhangList},yule:{name:'娱乐陪玩',icon:'🎮',desc:'轻松上分，快乐游戏',list:yuleList},jishu:{name:'技术陪玩',icon:'🎯',desc:'枪刚人猛，技术教学',list:jishuList}};
+
+// ==================== STORAGE ====================
+function getLocalPlayers(){try{return JSON.parse(localStorage.getItem('delta_custom_players'))||[]}catch(e){return[]}}
+function getApprovedPlayers(){return getLocalPlayers().filter(function(p){return p.status==='approved'})}
+function getPendingPlayers(){return getLocalPlayers().filter(function(p){return p.status==='pending'})}
+function saveLocalPlayer(p){try{var a=getLocalPlayers();a.push(p);localStorage.setItem('delta_custom_players',JSON.stringify(a));return true}catch(e){return false}}
+function updateLocalPlayers(list){try{localStorage.setItem('delta_custom_players',JSON.stringify(list));return true}catch(e){return false}}
+function getAvatarUrl(p){if(!p||!p.avatar)return'';if(p.avatar.indexOf('picsum.photos')!==-1)return'https://api.dicebear.com/9.x/bottts-neutral/svg?seed='+encodeURIComponent(p.nickname||'player');return p.avatar}
+function getPlayerListByType(t){var cat=categoryMap[t];if(!cat)return{name:'未知',list:[]};var deleted=getDeletedIds();var approved=getApprovedPlayers().filter(function(p){return p.type===t&&deleted.indexOf(p.id)===-1});var builtin=cat.list.filter(function(p){return deleted.indexOf(p.id)===-1});return{name:cat.name,list:[].concat(approved,builtin)}}
+function getPlayerById(id){var all=huhangList.concat(yuleList,jishuList);var p=all.find(function(x){return x.id===id});if(p)return p;return getLocalPlayers().find(function(x){return x.id===id})||null}
+function generateId(){return'local_'+Date.now()+'_'+Math.random().toString(36).substring(2,8)}
+function getConfig(){try{return JSON.parse(localStorage.getItem('delta_config'))||{}}catch(e){return{}}}
+function saveConfig(c){localStorage.setItem('delta_config',JSON.stringify(c))}
+function getOrders(){try{return JSON.parse(localStorage.getItem('delta_orders'))||[]}catch(e){return[]}}
+function saveOrder(o){var orders=getOrders();o.id='ord_'+Date.now()+'_'+Math.random().toString(36).substring(2,6);o.rated=false;orders.unshift(o);localStorage.setItem('delta_orders',JSON.stringify(orders))}
+function getDeletedIds(){try{return JSON.parse(localStorage.getItem('delta_deleted'))||[]}catch(e){return[]}}
+function addDeletedId(id){var ids=getDeletedIds();ids.push(id);localStorage.setItem('delta_deleted',JSON.stringify(ids))}
+function getAllPlayers(){var deleted=getDeletedIds();var all=[].concat(huhangList,yuleList,jishuList,getLocalPlayers());return all.filter(function(p){return deleted.indexOf(p.id)===-1})}
+function getRatings(){try{return JSON.parse(localStorage.getItem('delta_ratings'))||{}}catch(e){return{}}}
+function saveRating(orderId,score,text){var r=getRatings();r[orderId]={score:score,text:text,time:new Date().toISOString()};localStorage.setItem('delta_ratings',JSON.stringify(r))}
+
+// ==================== WEBHOOK (企业微信) ====================
+function sendWecomMsg(webhookUrl, markdown){
+  return fetch(webhookUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({msgtype:'markdown',markdown:{content:markdown}})}).then(function(r){return r.json()}).then(function(d){return d.errcode===0}).catch(function(){return false});
+}
+
+// ==================== APP STATE ====================
+var currentView='home',viewHistory=['home'],currentPlayer=null,orderUnit='小时',orderQty=1,totalPrice=0,isAdmin=false;
+
+function $_(s){return document.querySelector(s)}
+function $$_(s){return document.querySelectorAll(s)}
+function stars(r){var n=Math.floor(r);return Array.from({length:5},function(_,i){return i<n?'⭐':'☆'}).join('')}
+function fmtNum(n){if(n>=10000)return(n/10000).toFixed(1)+'w';if(n>=1000)return(n/1000).toFixed(1)+'k';return String(n)}
+function truncate(t,m){return t.length>m?t.substring(0,m)+'...':t}
+function showToast(msg){var el=$_('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove('show')},1800)}
+function showModal(icon,msg,sub,btns){$_('#modalIcon').textContent=icon;$_('#modalMsg').textContent=msg;$_('#modalSub').textContent=sub||'';$_('#modalBtns').innerHTML=btns.map(function(b,i){return'<button class="modal-btn '+(b.cls||'cancel')+'" data-idx="'+i+'">'+b.text+'</button>'}).join('');$_('#modalOverlay').classList.add('show');$_('#modalBtns').onclick=function(e){var btn=e.target.closest('.modal-btn');if(!btn)return;var idx=parseInt(btn.dataset.idx);closeModal();if(btns[idx]&&btns[idx].action)btns[idx].action()}}
+function closeModal(){$_('#modalOverlay').classList.remove('show')}
+
+// ==================== NAVIGATION ====================
+function navTo(view,params){
+  viewHistory.push(view);currentView=view;
+  $$_('.view').forEach(function(v){v.classList.remove('active')});
+  $_('#view-'+view).classList.add('active');window.scrollTo(0,0);
+  if(view==='list'&&params)renderList(params.type,params.title);
+  if(view==='detail'&&params)renderDetail(params.id);
+  if(view==='create')renderCreateForm();
+  if(view==='orders')renderOrders();
+  if(view==='settings')renderSettings();
+  if(view==='admin')renderAdmin();
+  closeOrderPanel();
+}
+function navBack(){
+  if(viewHistory.length<=1)return;
+  viewHistory.pop();var prev=viewHistory[viewHistory.length-1];
+  currentView=prev;$$_('.view').forEach(function(v){v.classList.remove('active')});
+  $_('#view-'+prev).classList.add('active');window.scrollTo(0,0);closeOrderPanel();
+}
+
+// ==================== HOME ====================
+function renderHome(){
+  $_('#catList').innerHTML=[{type:'huhang',name:'护航',icon:'🛡️',desc:'专业护航，保障撤离'},{type:'yule',name:'娱乐陪玩',icon:'🎮',desc:'轻松上分，快乐游戏'},{type:'jishu',name:'技术陪玩',icon:'🎯',desc:'枪刚人猛，技术教学'}].map(function(c){return'<div class="cat-card glass" onclick="navTo(\'list\',{type:\''+c.type+'\',title:\''+c.name+'\'})"><div class="cat-icon">'+c.icon+'</div><div class="cat-info"><div class="cat-name">'+c.name+'</div><div class="cat-desc">'+c.desc+'</div></div><div class="cat-arrow">▶</div></div>'}).join('');
+}
+
+// ==================== LIST ====================
+var _currentListData=[];
+function renderList(type,title){
+  var result=getPlayerListByType(type);
+  _currentListData=result.list;
+  $_('#listTitle').textContent=title||result.name;
+  $_('#searchInput').value='';
+  doRenderList(_currentListData);
+}
+function doRenderList(list){
+  var busyIds=getBusyIds();
+  var totalOrders=list.reduce(function(s,p){return s+p.orderCount},0);
+  var free=list.filter(function(p){return busyIds.indexOf(p.id)===-1}).length;
+  $_('#statsBar').innerHTML='<span class="stats-text">共 <span class="num">'+list.length+'</span> 位战士　空闲 <span class="num" style="color:#00e676">'+free+'</span></span><span class="sep"></span><span class="stats-text">已服务 <span class="num">'+fmtNum(totalOrders)+'</span> 位老板</span>';
+  if(list.length===0){$_('#playerList').innerHTML='<div class="empty-state"><span class="icon">🔍</span>没有找到匹配的战士</div>';$_('#loadMore').textContent='';return}
+  $_('#playerList').innerHTML=list.map(function(p){var isBusy=busyIds.indexOf(p.id)!==-1;return'<div class="player-card glass'+(isBusy?' busy-card':'')+'" onclick="'+(isBusy?'showToast(\'该打手正在接单中，请稍后再试\')':'navTo(\'detail\',{id:\''+p.id+'\'})')+'"><img class="p-avatar" src="'+getAvatarUrl(p)+'" loading="lazy" onerror="this.style.background=\'linear-gradient(135deg,#1a2230,#2a3340)\'" style="'+(isBusy?'opacity:0.5':'')+'"><div class="p-info"><div class="p-name-row"><span class="p-name">'+p.nickname+'</span>'+(isBusy?'<span style="font-size:12px;color:#ff9800;background:rgba(255,152,0,0.12);border-radius:4px;padding:1px 6px">🔴 接单中</span>':'')+'<span class="p-honor">'+p.honor+'</span></div><div class="p-stars">'+stars(p.rating)+'<span class="p-rating">'+p.rating+'</span></div><div class="p-tags">'+(p.tags||[]).map(function(t){return'<span class="p-tag">'+t+'</span>'}).join('')+'</div>'+(p.reviews&&p.reviews[0]?'<div class="p-review">"'+truncate(p.reviews[0].content,24)+'"</div>':'')+'</div><div class="p-price-area"><div class="p-price">¥'+p.price+'<small>/'+p.unit+'</small></div><div class="p-orders">已接'+p.orderCount+'单</div></div></div>'}).join('');
+  $_('#loadMore').textContent=list.length<=10?'— 全部战士已就位 —':'上拉加载更多';
+}
+function onSearch(){
+  var q=$_('#searchInput').value.trim().toLowerCase();
+  if(!q){doRenderList(_currentListData);return}
+  var filtered=_currentListData.filter(function(p){
+    if(p.nickname.toLowerCase().indexOf(q)!==-1)return true;
+    if((p.honor||'').toLowerCase().indexOf(q)!==-1)return true;
+    if((p.tags||[]).some(function(t){return t.toLowerCase().indexOf(q)!==-1}))return true;
+    return false;
+  });
+  doRenderList(filtered);
+}
+
+// ==================== DETAIL ====================
+function renderDetail(id){
+  var p=getPlayerById(id);if(!p){showToast('未找到');return}
+  currentPlayer=p;orderUnit=p.unit||'小时';orderQty=1;totalPrice=p.price||0;
+  var busyIds=getBusyIds();var isBusy=busyIds.indexOf(p.id)!==-1;
+  $_('#detailTitle').textContent=p.nickname;
+  // 接单中禁用下单按钮
+  var bb=$_('#view-detail .bottom-bar');
+  if(isBusy){bb.innerHTML='<button class="btn-gold" style="opacity:0.4;pointer-events:none;background:#555">🔴 该打手正在接单中，暂时无法下单</button>'}else{bb.innerHTML='<button class="btn-gold" onclick="openOrderPanel()">⚡ 立 即 下 单</button>'}
+  var reviewsHTML='';
+  if(p.reviews&&p.reviews.length>0){
+    reviewsHTML='<div class="reviews"><div class="reviews-header"><span class="reviews-title">▎老板售后评价</span><span class="reviews-count">共'+p.reviews.length+'条</span></div><div class="review-timeline">'+p.reviews.map(function(r){return'<div class="review-item glass"><div class="timeline-dot"></div><div class="review-head"><span class="review-user">'+r.userName+'</span><span class="review-score">'+stars(r.score||p.rating)+'</span></div><div class="review-text">'+r.content+'</div></div>'}).join('')+'</div></div>';
+  }
+  $_('#detailContent').innerHTML='<div class="profile-card glass"><div class="d-avatar-wrap"><img class="d-avatar" src="'+getAvatarUrl(p)+'" onerror="this.style.background=\'linear-gradient(135deg,#1a2230,#2a3340)\'"><div class="avatar-ring"></div></div><div class="d-name-row"><span class="d-name">'+p.nickname+'</span><span class="d-honor">'+p.honor+'</span></div><div class="d-rating"><span class="d-stars">'+stars(p.rating)+'</span><span class="d-rating-val">'+p.rating+'</span><span class="d-rating-label">综合老板售后评价</span></div><div class="d-stats"><div class="d-stat"><div class="d-stat-val">¥'+p.price+'</div><div class="d-stat-label">/'+p.unit+'</div></div><div class="d-stat-sep"></div><div class="d-stat"><div class="d-stat-val">'+p.orderCount+'</div><div class="d-stat-label">已接单数</div></div></div><div class="d-tags">'+(p.tags||[]).map(function(t){return'<span class="d-tag">'+t+'</span>'}).join('')+'</div><div class="d-intro"><span class="d-intro-title">▎个人简介</span><span class="d-intro-text">'+p.intro+'</span></div></div>'+reviewsHTML;
+  updateOrderPanel();
+}
+
+// ==================== ORDER PANEL ====================
+function openOrderPanel(){if(!currentPlayer)return;orderQty=1;orderUnit=currentPlayer.unit||'小时';totalPrice=currentPlayer.price||0;$_('#phoneInput').value='';updateOrderPanel();$_('#panelMask').classList.add('show');$_('#orderPanel').classList.add('show')}
+function closeOrderPanel(){$_('#panelMask').classList.remove('show');$_('#orderPanel').classList.remove('show')}
+function updateOrderPanel(){
+  if(!currentPlayer)return;var p=currentPlayer;
+  $_('#panelPlayerInfo').innerHTML='<div class="panel-player"><img class="panel-av" src="'+getAvatarUrl(p)+'" onerror="this.style.background=\'linear-gradient(135deg,#1a2230,#2a3340)\'"><div><div class="panel-pname">'+p.nickname+'</div><div class="panel-phonor">'+p.honor+'</div></div></div>';
+  $_('#unitSwitch').innerHTML=['小时','局'].map(function(u){return'<div class="unit-item'+(orderUnit===u?' active':'')+'" onclick="switchUnit(\''+u+'\')">按'+(u==='小时'?'小时':'局数')+'</div>'}).join('');
+  $_('#qtyVal').textContent=orderQty;$_('#totalPrice').textContent='¥'+totalPrice;
+  var qbtns=$_('#orderPanel').querySelectorAll('.qty-btn');if(qbtns[0])qbtns[0].classList.toggle('disabled',orderQty<=1);
+}
+function switchUnit(u){orderUnit=u;totalPrice=(currentPlayer?.price||0)*orderQty;updateOrderPanel()}
+function changeQty(d){orderQty+=d;if(orderQty<1)orderQty=1;if(orderQty>99){orderQty=99;showToast('最多99个')}totalPrice=(currentPlayer?.price||0)*orderQty;updateOrderPanel()}
+
+function confirmOrder(){
+  var phone=$_('#phoneInput').value.trim();
+  if(!phone){showToast('请填写联系电话');return}
+  if(!/^1[3-9]\d{9}$/.test(phone)){showToast('请输入正确的手机号');return}
+  var now=new Date();
+  var timeStr=now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate()+' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  var order={playerId:currentPlayer.id,playerName:currentPlayer.nickname,unit:orderUnit,quantity:orderQty,totalPrice:totalPrice,phone:phone,time:timeStr};
+  saveOrder(order);
+
+  // 复制订单到剪贴板（直接粘贴到群里）
+  var clip='🔔 三角洲新订单！\n\n'+
+    '━━━━━━━━━━━━━━\n'+
+    '🎯 打手：'+order.playerName+'\n'+
+    '🏅 荣誉：'+(currentPlayer.honor||'')+'\n'+
+    '📦 服务：'+order.quantity+order.unit+'\n'+
+    '💰 金额：¥'+order.totalPrice+'\n'+
+    '📱 电话：'+order.phone+'\n'+
+    '🕐 时间：'+order.time+'\n'+
+    '━━━━━━━━━━━━━━\n'+
+    '三角洲老板点单';
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(clip).then(function(){showToast('📋 订单已复制，去群里粘贴')});
+    }else{
+      // Fallback for older browsers
+      var ta=document.createElement('textarea');
+      ta.value=clip;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+      showToast('📋 订单已复制，去群里粘贴');
+    }
+  }catch(e){}
+
+  // 企微Webhook（如果配置了）
+  var cfg=getConfig();
+  if(cfg.webhookUrl){
+    var md='## 🔔 三角洲新订单！\n\n'+
+      '> **打手：**<font color="warning">'+order.playerName+'</font>\n'+
+      '> **荣誉：**'+(currentPlayer.honor||'')+'\n'+
+      '> **服务：**'+order.quantity+order.unit+'\n'+
+      '> **金额：**<font color="info">¥'+order.totalPrice+'</font>\n'+
+      '> **电话：**<font color="comment">'+order.phone+'</font>\n'+
+      '> **时间：**'+order.time+'\n\n'+
+      '---\n*三角洲老板点单*';
+    sendWecomMsg(cfg.webhookUrl, md);
+  }
+
+  showModal('🎉','下单成功！','📋 订单已复制到剪贴板\n去微信群粘贴即可通知客服\n\n陪玩将尽快联系您～',[{text:'知道了',cls:'confirm',action:function(){closeOrderPanel();navBack()}}]);
+}
+
+// ==================== CREATE ====================
+var createState={avatarData:'',type:'',unit:'小时'};
+function renderCreateForm(){
+  createState={avatarData:'',type:'',unit:'小时'};
+  $_('#createForm').innerHTML='<div class="form-group"><label class="form-label">头像</label><div class="avatar-upload" onclick="document.getElementById(\'avatarFile\').click()"><div class="avatar-placeholder" id="avatarPH"><span class="icon">📷</span><span class="text">点击上传</span></div><img class="avatar-preview" id="avatarPreview"></div><input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="previewAvatar(event)"></div><div class="form-group"><label class="form-label"><span class="req">*</span> 昵称</label><input class="form-input" id="fNickname" placeholder="取个酷炫的名字" maxlength="16"></div><div class="form-group"><label class="form-label"><span class="req">*</span> 服务分类</label><div class="type-options" id="fTypeOpts"><div class="type-opt" data-type="huhang" onclick="selectType(\'huhang\')"><span class="icon">🛡️</span><span class="label">护航</span></div><div class="type-opt" data-type="yule" onclick="selectType(\'yule\')"><span class="icon">🎮</span><span class="label">娱乐陪玩</span></div><div class="type-opt" data-type="jishu" onclick="selectType(\'jishu\')"><span class="icon">🎯</span><span class="label">技术陪玩</span></div></div></div><div class="form-group"><label class="form-label"><span class="req">*</span> 单价</label><div class="price-row"><span class="yen">¥</span><input class="form-input" id="fPrice" type="number" placeholder="输入单价"><span class="unit-label">元</span></div></div><div class="form-group"><label class="form-label">计费单位</label><div class="unit-toggle" id="fUnitToggle"><div class="unit-item active" data-unit="小时" onclick="selectFormUnit(\'小时\')">按小时</div><div class="unit-item" data-unit="局" onclick="selectFormUnit(\'局\')">按局数</div></div></div><div class="form-group"><label class="form-label">个人标签</label><input class="form-input" id="fTags" placeholder="用逗号分隔，如：战术大师,零失误" maxlength="60"><div class="tag-chips" id="fTagChips"></div></div><div class="form-group"><label class="form-label">荣誉勋章</label><input class="form-input" id="fHonor" placeholder="如：🏅 王牌护航员" maxlength="30"></div><div class="form-group"><label class="form-label"><span class="req">*</span> 个人简介</label><textarea class="form-textarea" id="fIntro" placeholder="介绍一下自己..." maxlength="200"></textarea></div><div class="submit-area"><button class="btn-gold" onclick="submitCreate()">🚀 确认入驻</button><div class="submit-tip">提交即表示同意平台入驻协议</div></div>';
+  $_('#fTags').addEventListener('input',function(){var tags=this.value.split(/[,，]/).map(function(t){return t.trim()}).filter(function(t){return t}).slice(0,5);$_('#fTagChips').innerHTML=tags.map(function(t){return'<span class="tag-chip">'+t+'</span>'}).join('')});
+}
+function previewAvatar(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){createState.avatarData=ev.target.result;$_('#avatarPH').style.display='none';var p=$_('#avatarPreview');p.src=ev.target.result;p.style.display='block'};r.readAsDataURL(f)}
+function selectType(t){createState.type=t;$$_('#fTypeOpts .type-opt').forEach(function(el){el.classList.toggle('active',el.dataset.type===t)})}
+function selectFormUnit(u){createState.unit=u;$$_('#fUnitToggle .unit-item').forEach(function(el){el.classList.toggle('active',el.dataset.unit===u)})}
+function submitCreate(){
+  var nickname=($_('#fNickname').value||'').trim(),type=createState.type,price=parseFloat($_('#fPrice').value),unit=createState.unit,tagsInput=($_('#fTags').value||'').trim(),honor=($_('#fHonor').value||'').trim(),intro=($_('#fIntro').value||'').trim();
+  if(!nickname){showToast('请输入昵称');return}if(!type){showToast('请选择分类');return}if(!price||price<=0){showToast('请输入有效单价');return}if(!intro){showToast('请输入个人简介');return}
+  var tags=tagsInput?tagsInput.split(/[,，]/).map(function(t){return t.trim()}).filter(function(t){return t}).slice(0,5):['新人入驻'];if(!tags.length)tags=['新人入驻'];
+  var player={id:generateId(),avatar:createState.avatarData||'',nickname:nickname,type:type,price:price,unit:unit,orderCount:0,rating:5.0,tags:tags,honor:honor||'🎖️ 新锐入驻',intro:intro,reviews:[],status:'pending'};
+  if(saveLocalPlayer(player)){showModal('📝','提交成功！','你的名片已提交审核\n管理员通过后将在列表中展示\n\n请耐心等待～',[{text:'知道了',cls:'confirm',action:function(){viewHistory=['home'];navTo('home')}}])}else{showToast('保存失败')}
+}
+
+// ==================== SETTINGS ====================
+function renderSettings(){var c=getConfig();$_('#sWebhook').value=c.webhookUrl||'';$_('#sAdminPwd').value=c.adminPwd||''}
+function saveSettings(){
+  var c={webhookUrl:$_('#sWebhook').value.trim(),adminPwd:$_('#sAdminPwd').value.trim()||'123456'};
+  saveConfig(c);showToast('✅ 设置已保存');
+}
+function testWebhook(){
+  var url=$_('#sWebhook').value.trim();
+  if(!url){showToast('请先填写Webhook地址');return}
+  showToast('⏳ 正在发送测试消息...');
+  sendWecomMsg(url,'## 🧪 测试消息\n\n三角洲老板点单通知配置成功！\n\n> 下单后将自动通知此群。').then(function(ok){if(ok)showToast('✅ 测试成功！请检查群消息');else showToast('❌ 发送失败，请检查地址')});
+}
+
+// ==================== ADMIN ====================
+var adminTab='orders';
+function renderAdmin(){
+  isAdmin=false;$_('#adminLoginBox').style.display='block';$_('#adminContent').style.display='none';adminTab='orders';
+}
+function adminLogin(){
+  var cfg=getConfig();var pwd=cfg.adminPwd||'123456';
+  if($_('#adminPwdInput').value===pwd){isAdmin=true;$_('#adminLoginBox').style.display='none';$_('#adminContent').style.display='block';switchAdminTab('orders')}else{showToast('密码错误')}
+}
+function switchAdminTab(tab){
+  adminTab=tab;
+  $$_('.admin-tab').forEach(function(el){el.classList.toggle('active',el.id==='tab'+tab.charAt(0).toUpperCase()+tab.slice(1))});
+  $_('#panelOrders').style.display=tab==='orders'?'block':'none';
+  $_('#panelReview').style.display=tab==='review'?'block':'none';
+  $_('#panelPlayers').style.display=tab==='players'?'block':'none';
+  if(tab==='orders')showOrders();
+  else if(tab==='review')showReviewList();
+  else if(tab==='players')showPlayerManage();
+}
+function showOrders(){
+  if(!isAdmin)return;
+  var orders=getOrders();
+  var total=orders.reduce(function(s,o){return s+(parseFloat(o.totalPrice)||0)},0);
+  $_('#adminStats').innerHTML='<div class="admin-stat"><div class="admin-stat-val">'+orders.length+'</div><div class="admin-stat-label">总订单数</div></div><div class="admin-stat"><div class="admin-stat-val">¥'+total+'</div><div class="admin-stat-label">总金额</div></div>';
+  if(orders.length===0){$_('#orderListPanel').innerHTML='<div class="empty-state"><span class="icon">📭</span>还没有订单</div>';return}
+  $_('#orderListPanel').innerHTML=orders.map(function(o){return'<div class="order-item glass"><div class="order-item-header"><span class="order-player-name">'+(o.playerName||'未知')+'</span><span class="order-time">'+(o.time||'')+'</span></div><div class="order-detail-row">服务：<span>'+(o.quantity||1)+(o.unit||'小时')+'</span>　金额：<span>¥'+(o.totalPrice||0)+'</span></div><div class="order-detail-row">电话：<span class="order-phone">'+(o.phone||'')+'</span></div></div>'}).join('');
+}
+function showReviewList(){
+  var pending=getPendingPlayers();
+  $_('#reviewBadge').textContent=pending.length;
+  if(pending.length===0){$_('#reviewListPanel').innerHTML='<div class="empty-state"><span class="icon">✅</span>没有待审核的打手</div>';return}
+  $_('#reviewListPanel').innerHTML=pending.map(function(p){return'<div class="review-item-box glass"><div class="review-player-info"><img class="review-avatar" src="'+getAvatarUrl(p)+'" onerror="this.style.background=\'linear-gradient(135deg,#1a2230,#2a3340)\'"><div class="review-meta"><div class="review-meta-name">'+p.nickname+'</div><div class="review-meta-detail">¥'+p.price+'/'+p.unit+'　分类：'+({huhang:'护航',yule:'娱乐陪玩',jishu:'技术陪玩'}[p.type]||'未知')+'　勋章：'+(p.honor||'无')+'</div></div></div><div class="review-tags-row">'+(p.tags||[]).map(function(t){return'<span class="p-tag">'+t+'</span>'}).join('')+'</div><div class="review-intro-text">'+p.intro+'</div><div class="review-btns"><button class="review-btn approve" onclick="approvePlayer(\''+p.id+'\')">✅ 通过</button><button class="review-btn reject" onclick="rejectPlayer(\''+p.id+'\')">❌ 拒绝</button></div></div>'}).join('');
+}
+function approvePlayer(id){
+  var list=getLocalPlayers();
+  var idx=list.findIndex(function(p){return p.id===id});
+  if(idx===-1)return;
+  list[idx].status='approved';
+  updateLocalPlayers(list);
+  showToast('✅ 已通过审核');
+  showReviewList();
+}
+function rejectPlayer(id){
+  showModal('⚠️','确认拒绝？','拒绝后该打手不会出现在列表中',[{text:'取消',cls:'cancel',action:function(){closeModal()}},{text:'确认拒绝',cls:'reject',action:function(){
+    var list=getLocalPlayers();
+    var idx=list.findIndex(function(p){return p.id===id});
+    if(idx===-1)return;
+    list.splice(idx,1);
+    updateLocalPlayers(list);
+    closeModal();showToast('已拒绝');showReviewList();
+  }}]);
+}
+function refreshAdmin(){if(adminTab==='orders')showOrders();else if(adminTab==='review')showReviewList();else if(adminTab==='players')showPlayerManage();showToast('已刷新')}
+
+function showPlayerManage(){
+  var players=getAllPlayers();
+  var deleted=getDeletedIds();
+  var busyIds=getBusyIds();
+  $_('#playerCountLabel').textContent='全部打手（'+players.length+'人）';
+  if(players.length===0){$_('#playerManageList').innerHTML='<div class="empty-state"><span class="icon">👥</span>没有打手</div>';return}
+  $_('#playerManageList').innerHTML=players.map(function(p){
+    var isLocal=p.id.indexOf('local_')===0;
+    var isBusy=busyIds.indexOf(p.id)!==-1;
+    return'<div class="review-item-box glass"><div class="review-player-info"><img class="review-avatar" src="'+getAvatarUrl(p)+'" onerror="this.style.background=\'linear-gradient(135deg,#1a2230,#2a3340)\'"><div class="review-meta"><div class="review-meta-name">'+p.nickname+' <span style="font-size:11px;color:var(--text-dim)">'+(isLocal?'[入驻]':'[内置]')+'</span>'+(isBusy?' <span class="review-status" style="background:rgba(255,152,0,0.12);color:#ff9800">🔴 接单中</span>':' <span class="review-status approved">🟢 空闲</span>')+'</div><div class="review-meta-detail">¥'+p.price+'/'+p.unit+'　'+({huhang:'护航',yule:'娱乐陪玩',jishu:'技术陪玩'}[p.type]||'未知')+'　已接'+p.orderCount+'单</div></div></div><div class="review-btns"><button class="review-btn '+(isBusy?'approve':'')+'" style="'+(isBusy?'':'background:rgba(255,152,0,0.15);color:#ff9800;border:1px solid rgba(255,152,0,0.3)')+'" onclick="toggleBusy(\''+p.id+'\')">'+(isBusy?'✅ 设为空闲':'🔴 接单中')+'</button><button class="review-btn reject" onclick="deletePlayer(\''+p.id+'\',\''+p.nickname+'\')">🗑️ 删除</button></div></div>';
+  }).join('');
+}
+
+function deletePlayer(id,name){
+  showModal('⚠️','确认删除「'+name+'」？','删除后该打手将从列表中移除',[{text:'取消',cls:'cancel',action:function(){closeModal()}},{text:'确认删除',cls:'reject',style:'background:#e74c3c;color:#fff',action:function(){
+    var list=getLocalPlayers();
+    var idx=list.findIndex(function(p){return p.id===id});
+    if(idx!==-1){list.splice(idx,1);updateLocalPlayers(list)}else{addDeletedId(id)}
+    closeModal();showPlayerManage();showToast('已删除');
+  }}]);
+}
+
+// Busy status
+function getBusyIds(){try{return JSON.parse(localStorage.getItem('delta_busy'))||[]}catch(e){return[]}}
+function toggleBusy(id){
+  var busy=getBusyIds();
+  var idx=busy.indexOf(id);
+  if(idx===-1)busy.push(id);else busy.splice(idx,1);
+  localStorage.setItem('delta_busy',JSON.stringify(busy));
+  showPlayerManage();showToast(idx===-1?'🔴 已设为接单中':'🟢 已设为空闲');
+}
+
+// ==================== MY ORDERS ====================
+function renderOrders(){
+  var orders=getOrders();
+  var ratings=getRatings();
+  if(orders.length===0){$_('#ordersContent').innerHTML='<div class="empty-state"><span class="icon">📭</span>还没有订单<br><span style="font-size:13px">快去选个战士下单吧！</span></div>';return}
+  $_('#ordersContent').innerHTML=orders.map(function(o,i){
+    var r=ratings[o.id];
+    var rated=r&&r.score;
+    return'<div class="order-card glass"><div class="order-card-header"><span class="order-card-player">🎯 '+(o.playerName||'未知')+'</span><span class="order-card-time">'+(o.time||'')+'</span></div><div class="order-card-body">服务：<span class="val">'+(o.quantity||1)+(o.unit||'小时')+'</span>　金额：<span class="val">¥'+(o.totalPrice||0)+'</span>　电话：<span class="order-card-phone">'+(o.phone||'')+'</span></div><div class="order-card-footer">'+(rated?'<span class="order-rated">⭐ '+r.score+'分　'+r.text+'</span>':'<button class="rate-btn" onclick="openRateModal(\''+o.id+'\',\''+o.playerName+'\')">⭐ 评价</button>')+'</div></div>';
+  }).join('');
+}
+var _ratingOrderId=null;
+function openRateModal(oid,pname){
+  _ratingOrderId=oid;
+  var starsHTML='';for(var i=1;i<=5;i++)starsHTML+='<span class="rate-star" onclick="setRateStar('+i+')" id="rs'+i+'">⭐</span>';
+  $_('#modalIcon').textContent='⭐';
+  $_('#modalMsg').textContent='评价 '+pname+' 的服务';
+  $_('#modalSub').innerHTML='<div class="rate-stars">'+starsHTML+'</div><textarea class="rate-textarea" id="rateText" placeholder="说说你的体验...（选填）" maxlength="100"></textarea>';
+  $_('#modalBtns').innerHTML='<button class="modal-btn cancel" onclick="closeModal()">取消</button><button class="modal-btn confirm" onclick="submitRating()">提交评价</button>';
+  $_('#modalOverlay').classList.add('show');_rateScore=0;
+}
+var _rateScore=0;
+function setRateStar(n){_rateScore=n;for(var i=1;i<=5;i++){$_('#rs'+i).classList.toggle('sel',i<=n)}}
+function submitRating(){
+  if(_rateScore===0){showToast('请先点星星评分');return}
+  var text=$_('#rateText')?$_('#rateText').value.trim():'';
+  if(!text)text='用户已评分';
+  saveRating(_ratingOrderId,_rateScore,text);
+  closeModal();showToast('✅ 评价成功！感谢反馈');
+  renderOrders();
+}
+
+// ==================== INIT ====================
+renderHome();
+
+window.addEventListener('popstate',function(e){if(e.state&&e.state.view){viewHistory=e.state.history||['home'];currentView=e.state.view;$$_('.view').forEach(function(v){v.classList.remove('active')});$_('#view-'+currentView).classList.add('active');closeOrderPanel()}});
+var _origNavTo=navTo;navTo=function(view,params){_origNavTo(view,params);history.pushState({view:view,history:viewHistory.slice()},'','#'+view)};
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeOrderPanel()});
+</script>
+</body>
+</html>

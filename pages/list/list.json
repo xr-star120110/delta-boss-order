@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "陪玩列表",
+  "navigationBarBackgroundColor": "#0a0e14",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#0a0e14",
+  "enablePullDownRefresh": true
+}

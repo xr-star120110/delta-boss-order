@@ -1,0 +1,258 @@
+/**
+ * 三角洲老板点单 - 打手入驻页样式
+ */
+
+/* ========== 页面容器 ========== */
+.container {
+  min-height: 100vh;
+  padding-bottom: 80rpx;
+}
+
+/* ========== 页面标题 ========== */
+.page-header {
+  padding: 50rpx 40rpx 30rpx;
+  text-align: center;
+  border-bottom: 1rpx solid rgba(201, 169, 110, 0.1);
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: 900;
+  color: #c9a96e;
+  letter-spacing: 6rpx;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.page-desc {
+  font-size: 24rpx;
+  color: rgba(224, 224, 224, 0.4);
+  letter-spacing: 2rpx;
+}
+
+/* ========== 表单区域 ========== */
+.form-section {
+  padding: 30rpx 30rpx 0;
+}
+
+/* ========== 表单项 ========== */
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #e0e0e0;
+  display: block;
+  margin-bottom: 14rpx;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+/* ========== 输入框 ========== */
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  background: rgba(20, 26, 36, 0.8);
+  border: 1rpx solid rgba(201, 169, 110, 0.15);
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #e0e0e0;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: rgba(201, 169, 110, 0.5);
+  box-shadow: 0 0 20rpx rgba(201, 169, 110, 0.1);
+}
+
+/* 单价输入 */
+.price-input-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(20, 26, 36, 0.8);
+  border: 1rpx solid rgba(201, 169, 110, 0.15);
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.price-prefix {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #c9a96e;
+  padding-left: 24rpx;
+}
+
+.price-input {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+}
+
+.price-unit-label {
+  font-size: 24rpx;
+  color: rgba(224, 224, 224, 0.4);
+  padding-right: 24rpx;
+}
+
+/* ========== 文本域 ========== */
+.form-textarea {
+  width: 100%;
+  min-height: 160rpx;
+  background: rgba(20, 26, 36, 0.8);
+  border: 1rpx solid rgba(201, 169, 110, 0.15);
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  color: #e0e0e0;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+/* ========== 头像上传 ========== */
+.avatar-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-preview {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(201, 169, 110, 0.4);
+  box-shadow: 0 0 20rpx rgba(201, 169, 110, 0.2);
+}
+
+.upload-placeholder {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  border: 2rpx dashed rgba(201, 169, 110, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 26, 36, 0.6);
+}
+
+.upload-icon {
+  font-size: 48rpx;
+  margin-bottom: 4rpx;
+}
+
+.upload-text {
+  font-size: 20rpx;
+  color: rgba(224, 224, 224, 0.4);
+}
+
+/* ========== 分类选择 ========== */
+.type-selector {
+  display: flex;
+  gap: 16rpx;
+}
+
+.type-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 10rpx;
+  background: rgba(20, 26, 36, 0.8);
+  border: 2rpx solid rgba(201, 169, 110, 0.12);
+  border-radius: 14rpx;
+  transition: all 0.2s;
+}
+
+.type-option.active {
+  border-color: #c9a96e;
+  background: rgba(201, 169, 110, 0.1);
+  box-shadow: 0 0 20rpx rgba(201, 169, 110, 0.15);
+}
+
+.type-option:active {
+  transform: scale(0.95);
+}
+
+.type-icon {
+  font-size: 40rpx;
+  margin-bottom: 8rpx;
+}
+
+.type-name {
+  font-size: 22rpx;
+  color: rgba(224, 224, 224, 0.6);
+}
+
+.type-option.active .type-name {
+  color: #c9a96e;
+  font-weight: 700;
+}
+
+/* ========== 单位切换 ========== */
+.unit-switch {
+  display: flex;
+  background: rgba(20, 26, 36, 0.8);
+  border-radius: 12rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(201, 169, 110, 0.12);
+  width: fit-content;
+}
+
+.unit-item {
+  padding: 16rpx 36rpx;
+  font-size: 26rpx;
+  color: rgba(224, 224, 224, 0.5);
+}
+
+.unit-item.active {
+  background: rgba(201, 169, 110, 0.18);
+  color: #c9a96e;
+  font-weight: 700;
+}
+
+/* ========== 标签预览 ========== */
+.tag-preview {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 12rpx;
+}
+
+.tag-chip {
+  font-size: 22rpx;
+  color: rgba(0, 230, 118, 0.85);
+  background: rgba(0, 230, 118, 0.08);
+  border: 1rpx solid rgba(0, 230, 118, 0.2);
+  border-radius: 8rpx;
+  padding: 4rpx 16rpx;
+  margin-right: 10rpx;
+  margin-bottom: 6rpx;
+}
+
+/* ========== 提交区域 ========== */
+.submit-section {
+  padding: 50rpx 30rpx;
+  text-align: center;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-bottom: 16rpx;
+  font-size: 34rpx;
+  letter-spacing: 6rpx;
+}
+
+.submit-btn.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.submit-tip {
+  font-size: 22rpx;
+  color: rgba(224, 224, 224, 0.3);
+  letter-spacing: 2rpx;
+}

@@ -1,0 +1,75 @@
+<!--
+  三角洲老板点单 - 陪玩列表页
+  根据分类展示陪玩卡片列表，支持下拉刷新和触底加载
+-->
+<view class="container">
+  <!-- 顶部统计条 -->
+  <view class="stats-bar">
+    <text class="stats-text">共 <text class="stats-num">{{totalCount}}</text> 位战士待命中</text>
+    <view class="stats-divider"></view>
+    <text class="stats-text">已服务 <text class="stats-num">{{totalOrders}}</text> 位老板</text>
+  </view>
+
+  <!-- 陪玩列表 -->
+  <view class="player-list">
+    <view
+      class="player-card glass-card"
+      wx:for="{{playerList}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onPlayerTap"
+    >
+      <!-- 左侧头像区 -->
+      <view class="player-avatar-wrap">
+        <image
+          class="player-avatar"
+          src="{{item.avatar}}"
+          mode="aspectFill"
+          lazy-load="{{true}}"
+        />
+        <!-- 在线状态指示器 -->
+        <view class="online-dot"></view>
+      </view>
+
+      <!-- 中间信息区 -->
+      <view class="player-info">
+        <!-- 昵称行 -->
+        <view class="info-row">
+          <text class="player-nickname">{{item.nickname}}</text>
+          <!-- 荣誉勋章 -->
+          <text class="player-honor">{{item.honor}}</text>
+        </view>
+
+        <!-- 评分行 -->
+        <view class="info-row rating-row">
+          <text class="rating-stars" wx:for="{{item.ratingStars}}" wx:key="*this" wx:for-item="star">{{star}}</text>
+          <text class="rating-value">{{item.rating}}</text>
+        </view>
+
+        <!-- 标签行 -->
+        <view class="tags-row">
+          <text class="tag-item" wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+        </view>
+
+        <!-- 最近评价 -->
+        <view class="review-preview" wx:if="{{item.latestReview}}">
+          <text class="review-text">"{{item.latestReview}}"</text>
+        </view>
+      </view>
+
+      <!-- 右侧价格区 -->
+      <view class="player-price">
+        <text class="price-value">¥{{item.price}}</text>
+        <text class="price-unit">/{{item.unit}}</text>
+        <text class="order-count">已接{{item.orderCount}}单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载更多提示 -->
+  <view class="load-more">
+    <text class="load-text" wx:if="{{loading}}">正在集结更多战士...</text>
+    <text class="load-text" wx:elif="{{noMore}}">— 全部战士已就位 —</text>
+    <text class="load-text" wx:else>上拉加载更多</text>
+  </view>
+</view>

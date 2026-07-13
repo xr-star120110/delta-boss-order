@@ -1,0 +1,172 @@
+<!--
+  三角洲老板点单 - 打手入驻/创建名片页
+  打手自行填写信息，创建专属名片
+-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">🎖️ 打手入驻</text>
+    <text class="page-desc">填写以下信息，创建你的专属名片</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-section">
+
+    <!-- 头像上传 -->
+    <view class="form-item" bindtap="onChooseAvatar">
+      <text class="form-label">头像</text>
+      <view class="avatar-upload">
+        <image
+          wx:if="{{formData.avatar}}"
+          class="upload-preview"
+          src="{{formData.avatar}}"
+          mode="aspectFill"
+        />
+        <view wx:else class="upload-placeholder">
+          <text class="upload-icon">📷</text>
+          <text class="upload-text">点击上传</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 昵称 -->
+    <view class="form-item">
+      <text class="form-label">昵称 <text class="required">*</text></text>
+      <input
+        class="form-input"
+        placeholder="取个霸气的名字"
+        placeholder-style="color: rgba(224,224,224,0.25)"
+        value="{{formData.nickname}}"
+        bindinput="onInputChange"
+        data-field="nickname"
+        maxlength="12"
+      />
+    </view>
+
+    <!-- 服务分类 -->
+    <view class="form-item">
+      <text class="form-label">服务分类 <text class="required">*</text></text>
+      <view class="type-selector">
+        <view
+          class="type-option {{formData.type === 'huhang' ? 'active' : ''}}"
+          data-type="huhang"
+          bindtap="onTypeSelect"
+        >
+          <text class="type-icon">🛡️</text>
+          <text class="type-name">护航</text>
+        </view>
+        <view
+          class="type-option {{formData.type === 'yule' ? 'active' : ''}}"
+          data-type="yule"
+          bindtap="onTypeSelect"
+        >
+          <text class="type-icon">🎮</text>
+          <text class="type-name">娱乐陪玩</text>
+        </view>
+        <view
+          class="type-option {{formData.type === 'jishu' ? 'active' : ''}}"
+          data-type="jishu"
+          bindtap="onTypeSelect"
+        >
+          <text class="type-icon">🎯</text>
+          <text class="type-name">技术陪玩</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 单价 -->
+    <view class="form-item">
+      <text class="form-label">单价 <text class="required">*</text></text>
+      <view class="price-input-wrap">
+        <text class="price-prefix">¥</text>
+        <input
+          class="form-input price-input"
+          type="digit"
+          placeholder="输入价格"
+          placeholder-style="color: rgba(224,224,224,0.25)"
+          value="{{formData.price}}"
+          bindinput="onInputChange"
+          data-field="price"
+        />
+        <text class="price-unit-label">/{{formData.unit}}</text>
+      </view>
+    </view>
+
+    <!-- 服务单位 -->
+    <view class="form-item">
+      <text class="form-label">服务单位</text>
+      <view class="unit-switch">
+        <view
+          class="unit-item {{formData.unit === '小时' ? 'active' : ''}}"
+          data-unit="小时"
+          bindtap="onUnitSwitch"
+        >
+          <text>按小时</text>
+        </view>
+        <view
+          class="unit-item {{formData.unit === '局' ? 'active' : ''}}"
+          data-unit="局"
+          bindtap="onUnitSwitch"
+        >
+          <text>按局数</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 个人标签 -->
+    <view class="form-item">
+      <text class="form-label">个人标签</text>
+      <input
+        class="form-input"
+        placeholder="用逗号分隔，如：枪刚,耐心,战术大师"
+        placeholder-style="color: rgba(224,224,224,0.25)"
+        value="{{formData.tagsInput}}"
+        bindinput="onInputChange"
+        data-field="tagsInput"
+        maxlength="30"
+      />
+      <!-- 标签预览 -->
+      <view class="tag-preview" wx:if="{{tagList.length > 0}}">
+        <text class="tag-chip" wx:for="{{tagList}}" wx:key="*this" wx:for-item="t">{{t}}</text>
+      </view>
+    </view>
+
+    <!-- 荣誉勋章 -->
+    <view class="form-item">
+      <text class="form-label">荣誉勋章</text>
+      <input
+        class="form-input"
+        placeholder="如：王牌护航员、百场零失误"
+        placeholder-style="color: rgba(224,224,224,0.25)"
+        value="{{formData.honor}}"
+        bindinput="onInputChange"
+        data-field="honor"
+        maxlength="20"
+      />
+    </view>
+
+    <!-- 个人简介 -->
+    <view class="form-item">
+      <text class="form-label">个人简介 <text class="required">*</text></text>
+      <textarea
+        class="form-textarea"
+        placeholder="介绍一下你自己，让老板更了解你（50字左右）"
+        placeholder-style="color: rgba(224,224,224,0.25)"
+        value="{{formData.intro}}"
+        bindinput="onInputChange"
+        data-field="intro"
+        maxlength="100"
+        auto-height
+      />
+    </view>
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-section">
+    <view class="submit-btn btn-primary {{submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+      <text wx:if="{{!submitting}}">🚀 提交入驻</text>
+      <text wx:else>提交中...</text>
+    </view>
+    <text class="submit-tip">提交后可在对应分类列表中查看你的名片</text>
+  </view>
+</view>

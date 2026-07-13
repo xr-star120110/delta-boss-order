@@ -1,0 +1,178 @@
+<!--
+  三角洲老板点单 - 陪玩详情页
+  展示陪玩完整信息、老板售后评价、下单面板
+-->
+<view class="container">
+  <!-- ===== 基本信息区 ===== -->
+  <view class="profile-section glass-card">
+    <!-- 头像 -->
+    <view class="profile-avatar-wrap">
+      <image class="profile-avatar" src="{{player.avatar}}" mode="aspectFill" />
+      <!-- 等级边框装饰 -->
+      <view class="avatar-ring"></view>
+    </view>
+
+    <!-- 昵称 + 荣誉 -->
+    <view class="profile-name-row">
+      <text class="profile-nickname">{{player.nickname}}</text>
+      <text class="profile-honor">{{player.honor}}</text>
+    </view>
+
+    <!-- 评分：大号展示 -->
+    <view class="profile-rating">
+      <text class="big-stars" wx:for="{{player.ratingStars}}" wx:key="*this" wx:for-item="star">{{star}}</text>
+      <text class="big-rating-value">{{player.rating}}</text>
+      <text class="rating-label">综合老板售后评价</text>
+    </view>
+
+    <!-- 价格 + 接单数 -->
+    <view class="profile-stats">
+      <view class="stat-item">
+        <text class="stat-value">¥{{player.price}}</text>
+        <text class="stat-label">/{{player.unit}}</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{player.orderCount}}</text>
+        <text class="stat-label">已接单数</text>
+      </view>
+    </view>
+
+    <!-- 个人特色标签 -->
+    <view class="profile-tags">
+      <text class="tag-item" wx:for="{{player.tags}}" wx:key="*this" wx:for-item="tag">{{tag}}</text>
+    </view>
+
+    <!-- 个人简介 -->
+    <view class="profile-intro">
+      <text class="intro-title">▎个人简介</text>
+      <text class="intro-content">{{player.intro}}</text>
+    </view>
+  </view>
+
+  <!-- ===== 老板售后评价区 ===== -->
+  <view class="reviews-section">
+    <view class="section-header">
+      <text class="section-title">▎老板售后评价</text>
+      <text class="section-count">共{{reviews.length}}条</text>
+    </view>
+
+    <!-- 评价时间线 -->
+    <view class="review-timeline">
+      <view class="review-item glass-card" wx:for="{{reviews}}" wx:key="index">
+        <!-- 时间线节点 -->
+        <view class="timeline-dot"></view>
+        <!-- 评价内容 -->
+        <view class="review-content">
+          <view class="review-header">
+            <text class="review-user">{{item.userName}}</text>
+            <text class="review-score" wx:if="{{item.score}}">
+              <text wx:for="{{item.stars}}" wx:key="*this" wx:for-item="s">{{s}}</text>
+            </text>
+          </view>
+          <text class="review-text">{{item.content}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部占位（防止被固定按钮遮挡） -->
+  <view class="bottom-placeholder"></view>
+
+  <!-- ===== 底部固定下单按钮 ===== -->
+  <view class="bottom-bar">
+    <view class="order-btn btn-primary" bindtap="onOrderTap">
+      <text class="order-btn-text">⚡ 立 即 下 单</text>
+    </view>
+  </view>
+
+  <!-- ===== 半屏下单面板（弹层） ===== -->
+  <view class="order-panel-mask {{showOrderPanel ? 'show' : ''}}" bindtap="onClosePanel">
+    <!-- 面板主体，阻止冒泡防止点击面板关闭 -->
+    <view class="order-panel {{showOrderPanel ? 'show' : ''}}" catchtap="onPanelStay">
+      <!-- 面板拖拽条 -->
+      <view class="panel-handle"></view>
+
+      <!-- 面板标题 -->
+      <view class="panel-header">
+        <text class="panel-title">确认订单</text>
+        <text class="panel-close" bindtap="onClosePanel">✕</text>
+      </view>
+
+      <!-- 陪玩信息摘要 -->
+      <view class="panel-player-info">
+        <image class="panel-avatar" src="{{player.avatar}}" mode="aspectFill" />
+        <view class="panel-player-text">
+          <text class="panel-nickname">{{player.nickname}}</text>
+          <text class="panel-honor">{{player.honor}}</text>
+        </view>
+      </view>
+
+      <!-- 分隔线 -->
+      <view class="panel-divider"></view>
+
+      <!-- 服务单位选择 -->
+      <view class="order-option">
+        <text class="option-label">服务单位</text>
+        <view class="unit-switch">
+          <view
+            class="unit-item {{orderUnit === '小时' ? 'active' : ''}}"
+            data-unit="小时"
+            bindtap="onUnitSwitch"
+          >
+            <text>按小时</text>
+          </view>
+          <view
+            class="unit-item {{orderUnit === '局' ? 'active' : ''}}"
+            data-unit="局"
+            bindtap="onUnitSwitch"
+          >
+            <text>按局数</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 数量选择器 -->
+      <view class="order-option">
+        <text class="option-label">数量</text>
+        <view class="quantity-selector">
+          <view class="qty-btn {{orderQuantity <= 1 ? 'disabled' : ''}}" bindtap="onQtyMinus">
+            <text>−</text>
+          </view>
+          <text class="qty-value">{{orderQuantity}}</text>
+          <view class="qty-btn" bindtap="onQtyPlus">
+            <text>+</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 联系方式 -->
+      <view class="order-option">
+        <text class="option-label">联系电话</text>
+        <input
+          class="phone-input"
+          type="number"
+          maxlength="11"
+          placeholder="请输入手机号"
+          placeholder-style="color: rgba(224,224,224,0.3)"
+          value="{{phoneNumber}}"
+          bindinput="onPhoneInput"
+        />
+      </view>
+
+      <!-- 分隔线 -->
+      <view class="panel-divider"></view>
+
+      <!-- 实时计算总价 -->
+      <view class="total-price-row">
+        <text class="total-label">订单总额</text>
+        <text class="total-value">¥{{totalPrice}}</text>
+      </view>
+
+      <!-- 确认下单按钮 -->
+      <view class="confirm-btn btn-primary" bindtap="onConfirmOrder">
+        <text>确认下单</text>
+      </view>
+    </view>
+  </view>
+</view>

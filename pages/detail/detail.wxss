@@ -1,0 +1,519 @@
+/**
+ * 三角洲老板点单 - 详情页样式
+ */
+
+/* ========== 页面容器 ========== */
+.container {
+  min-height: 100vh;
+  padding: 20rpx 24rpx;
+  padding-bottom: 0;
+}
+
+/* ======================================== */
+/*              基本信息区                    */
+/* ======================================== */
+
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50rpx 30rpx 36rpx;
+  margin-bottom: 24rpx;
+}
+
+/* 头像 */
+.profile-avatar-wrap {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  margin-bottom: 24rpx;
+}
+
+.profile-avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(201, 169, 110, 0.5);
+}
+
+/* 头像装饰环 */
+.avatar-ring {
+  position: absolute;
+  top: -8rpx;
+  left: -8rpx;
+  right: -8rpx;
+  bottom: -8rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(0, 230, 118, 0.25);
+  border-top-color: rgba(201, 169, 110, 0.5);
+  animation: ring-rotate 8s linear infinite;
+}
+
+@keyframes ring-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 昵称 + 荣誉 */
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18rpx;
+}
+
+.profile-nickname {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #e0e0e0;
+  margin-right: 16rpx;
+  letter-spacing: 4rpx;
+}
+
+.profile-honor {
+  font-size: 22rpx;
+  color: #c9a96e;
+  background: rgba(201, 169, 110, 0.12);
+  border: 1rpx solid rgba(201, 169, 110, 0.3);
+  border-radius: 8rpx;
+  padding: 4rpx 14rpx;
+}
+
+/* 评分 */
+.profile-rating {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.big-stars {
+  font-size: 32rpx;
+  margin-right: 2rpx;
+}
+
+.big-rating-value {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #c9a96e;
+  margin: 0 10rpx;
+}
+
+.rating-label {
+  font-size: 22rpx;
+  color: rgba(224, 224, 224, 0.4);
+  margin-left: 8rpx;
+}
+
+/* 价格 + 接单 */
+.profile-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 24rpx;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #c9a96e;
+  text-shadow: 0 0 10rpx rgba(201, 169, 110, 0.3);
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: rgba(224, 224, 224, 0.4);
+  margin-top: 4rpx;
+}
+
+.stat-divider {
+  width: 2rpx;
+  height: 50rpx;
+  background: rgba(201, 169, 110, 0.2);
+  margin: 0 60rpx;
+}
+
+/* 标签 */
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 28rpx;
+}
+
+.profile-tags .tag-item {
+  font-size: 22rpx;
+  color: rgba(0, 230, 118, 0.85);
+  background: rgba(0, 230, 118, 0.08);
+  border: 1rpx solid rgba(0, 230, 118, 0.2);
+  border-radius: 8rpx;
+  padding: 6rpx 16rpx;
+  margin: 4rpx 8rpx;
+}
+
+/* 个人简介 */
+.profile-intro {
+  width: 100%;
+  padding: 20rpx;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(201, 169, 110, 0.08);
+}
+
+.intro-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #c9a96e;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.intro-content {
+  font-size: 26rpx;
+  color: rgba(224, 224, 224, 0.7);
+  line-height: 1.7;
+}
+
+/* ======================================== */
+/*              售后评价区                    */
+/* ======================================== */
+
+.reviews-section {
+  margin-bottom: 180rpx;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8rpx 20rpx;
+}
+
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.section-count {
+  font-size: 24rpx;
+  color: rgba(224, 224, 224, 0.35);
+}
+
+/* 评价时间线 */
+.review-timeline {
+  position: relative;
+  padding-left: 30rpx;
+}
+
+/* 时间线竖线 */
+.review-timeline::before {
+  content: '';
+  position: absolute;
+  left: 12rpx;
+  top: 0;
+  bottom: 0;
+  width: 2rpx;
+  background: linear-gradient(180deg, #c9a96e, rgba(201, 169, 110, 0.1));
+}
+
+.review-item {
+  position: relative;
+  padding: 24rpx 24rpx 24rpx 30rpx;
+  margin-bottom: 16rpx;
+}
+
+/* 时间线节点 */
+.timeline-dot {
+  position: absolute;
+  left: -22rpx;
+  top: 32rpx;
+  width: 14rpx;
+  height: 14rpx;
+  background: #c9a96e;
+  border-radius: 50%;
+  border: 2rpx solid #0a0e14;
+  box-shadow: 0 0 12rpx rgba(201, 169, 110, 0.5);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.review-user {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #c9a96e;
+}
+
+.review-score {
+  font-size: 20rpx;
+}
+
+.review-text {
+  font-size: 26rpx;
+  color: rgba(224, 224, 224, 0.7);
+  line-height: 1.6;
+}
+
+/* ======================================== */
+/*              底部占位                      */
+/* ======================================== */
+
+.bottom-placeholder {
+  height: 120rpx;
+}
+
+/* ======================================== */
+/*              底部下单按钮                   */
+/* ======================================== */
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16rpx 30rpx;
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, #0a0e14 0%, rgba(10, 14, 20, 0.95) 80%, rgba(10, 14, 20, 0) 100%);
+  z-index: 100;
+}
+
+.order-btn {
+  width: 100%;
+}
+
+.order-btn-text {
+  font-size: 34rpx;
+  letter-spacing: 8rpx;
+}
+
+/* ======================================== */
+/*              半屏下单面板                    */
+/* ======================================== */
+
+/* 遮罩层 */
+.order-panel-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.order-panel-mask.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 面板主体 */
+.order-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #141a24;
+  border-radius: 32rpx 32rpx 0 0;
+  z-index: 201;
+  padding: 0 30rpx 30rpx;
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.order-panel.show {
+  transform: translateY(0);
+}
+
+/* 拖拽条 */
+.panel-handle {
+  width: 60rpx;
+  height: 6rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3rpx;
+  margin: 16rpx auto 24rpx;
+}
+
+/* 面板标题 */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.panel-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.panel-close {
+  font-size: 36rpx;
+  color: rgba(224, 224, 224, 0.5);
+  padding: 8rpx;
+}
+
+/* 陪玩摘要 */
+.panel-player-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.panel-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(201, 169, 110, 0.4);
+  margin-right: 16rpx;
+}
+
+.panel-player-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-nickname {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.panel-honor {
+  font-size: 22rpx;
+  color: #c9a96e;
+  margin-top: 4rpx;
+}
+
+/* 分隔线 */
+.panel-divider {
+  height: 1rpx;
+  background: rgba(201, 169, 110, 0.1);
+  margin: 24rpx 0;
+}
+
+/* 订单选项行 */
+.order-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.option-label {
+  font-size: 28rpx;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+/* 单位切换开关 */
+.unit-switch {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(201, 169, 110, 0.15);
+}
+
+.unit-item {
+  padding: 10rpx 24rpx;
+  font-size: 24rpx;
+  color: rgba(224, 224, 224, 0.5);
+  transition: all 0.2s;
+}
+
+.unit-item.active {
+  background: rgba(201, 169, 110, 0.2);
+  color: #c9a96e;
+  font-weight: 700;
+}
+
+/* 数量选择器 */
+.quantity-selector {
+  display: flex;
+  align-items: center;
+}
+
+.qty-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 169, 110, 0.12);
+  border: 1rpx solid rgba(201, 169, 110, 0.25);
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  color: #c9a96e;
+  font-weight: 700;
+}
+
+.qty-btn.disabled {
+  opacity: 0.3;
+}
+
+.qty-btn:active {
+  background: rgba(201, 169, 110, 0.25);
+}
+
+.qty-value {
+  width: 80rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+/* 手机号输入 */
+.phone-input {
+  width: 320rpx;
+  text-align: right;
+  font-size: 28rpx;
+  color: #e0e0e0;
+  padding: 10rpx 16rpx;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8rpx;
+  border: 1rpx solid rgba(201, 169, 110, 0.15);
+}
+
+/* 总价行 */
+.total-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 30rpx;
+}
+
+.total-label {
+  font-size: 30rpx;
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.total-value {
+  font-size: 48rpx;
+  font-weight: 900;
+  color: #00e676;
+  text-shadow: 0 0 20rpx rgba(0, 230, 118, 0.4);
+}
+
+/* 确认下单按钮 */
+.confirm-btn {
+  width: 100%;
+}

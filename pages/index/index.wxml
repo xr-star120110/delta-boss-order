@@ -1,0 +1,73 @@
+<!--
+  三角洲老板点单 - 首页
+  展示三个分类入口卡片：护航、娱乐陪玩、技术陪玩
+  设计风格：军事硬核 + 赛博朋克
+-->
+<view class="container">
+  <!-- 顶部标题区域 -->
+  <view class="header">
+    <view class="header-bg"></view>
+    <view class="header-content">
+      <text class="header-title">三角洲 · 老板点单</text>
+      <text class="header-subtitle">DELTA FORCE · BOSS ORDER</text>
+      <!-- 装饰分割线 -->
+      <view class="header-divider">
+        <view class="divider-line"></view>
+        <text class="divider-icon">⚔️</text>
+        <view class="divider-line"></view>
+      </view>
+      <text class="header-desc">选择你的专属战士，开启胜利之旅</text>
+    </view>
+  </view>
+
+  <!-- 分类入口卡片列表 -->
+  <view class="category-list">
+    <view
+      class="category-card glass-card"
+      wx:for="{{categories}}"
+      wx:key="type"
+      data-type="{{item.type}}"
+      bindtap="onCategoryTap"
+    >
+      <!-- 卡片左侧图标区 -->
+      <view class="card-icon-wrap">
+        <text class="card-icon">{{item.icon}}</text>
+      </view>
+      <!-- 卡片右侧文字区 -->
+      <view class="card-info">
+        <text class="card-name">{{item.name}}</text>
+        <text class="card-desc">{{item.desc}}</text>
+      </view>
+      <!-- 进入箭头 -->
+      <view class="card-arrow">
+        <text class="arrow-icon">▶</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 打手入驻入口 -->
+  <view class="join-section">
+    <view class="join-divider">
+      <view class="divider-line"></view>
+      <text class="join-divider-text">打 手 入 驻</text>
+      <view class="divider-line"></view>
+    </view>
+    <view class="join-card glass-card" bindtap="onJoinTap">
+      <view class="join-icon-wrap">
+        <text class="join-icon">🎖️</text>
+      </view>
+      <view class="join-info">
+        <text class="join-title">我是打手，申请入驻</text>
+        <text class="join-desc">创建你的专属名片，让更多老板找到你</text>
+      </view>
+      <view class="card-arrow">
+        <text class="arrow-icon">▶</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部标语 -->
+  <view class="footer-motto">
+    <text class="motto-text">「 每一场战斗，都值得认真对待 」</text>
+  </view>
+</view>
