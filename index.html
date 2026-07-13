@@ -199,10 +199,24 @@ body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:
     <div id="panelMyOrders" style="display:none"><div id="myOrdersContent"></div></div>
     <div id="panelSettings" style="display:none"><div style="padding:16px">
       <div class="settings-section">
-        <h3>📢 企业微信群机器人通知</h3>
-        <div class="form-group"><label class="form-label">Webhook 地址</label><input class="form-input" id="sWebhook" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..."></div>
-        <div class="settings-hint"><strong>怎么获取？</strong><br>1. 打开企业微信群 → 右上角 <strong>···</strong> → <strong>群机器人</strong><br>2. 添加机器人 → 复制 <strong>Webhook 地址</strong><br>3. 粘贴到上方 → 点下方「保存并测试」</div>
-        <button class="test-btn" onclick="testWebhook()">🧪 发送测试消息</button>
+        <h3>📢 企业微信通知</h3>
+        <div class="form-group"><label class="form-label">通知方式</label>
+          <div style="display:flex;gap:10px;margin-top:6px">
+            <button class="admin-tab" id="notiWebhook" onclick="switchNotiMode('webhook')" style="flex:1;padding:8px;font-size:13px">🔗 群机器人</button>
+            <button class="admin-tab" id="notiApp" onclick="switchNotiMode('app')" style="flex:1;padding:8px;font-size:13px">🤖 应用消息</button>
+          </div>
+        </div>
+        <div id="notiWebhookFields">
+          <div class="form-group"><label class="form-label">Webhook 地址</label><input class="form-input" id="sWebhook" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..."></div>
+          <div class="settings-hint"><strong>怎么获取？</strong><br>企业微信群 → 右上角 ··· → 群机器人 → 添加 → 复制地址</div>
+        </div>
+        <div id="notiAppFields" style="display:none">
+          <div class="form-group"><label class="form-label">企业ID（CorpID）</label><input class="form-input" id="sCorpId" placeholder="ww..."></div>
+          <div class="form-group"><label class="form-label">Bot ID（AgentID）</label><input class="form-input" id="sAgentId" placeholder="1000001"></div>
+          <div class="form-group"><label class="form-label">Secret</label><input class="form-input" id="sSecret" placeholder="应用密钥"></div>
+          <div class="settings-hint"><strong>怎么获取？</strong><br>企业微信管理后台 → 应用管理 → 自建应用 → 查看 AgentId 和 Secret<br>企业ID在「我的企业」→ 企业信息</div>
+        </div>
+        <button class="test-btn" onclick="testNotification()">🧪 发送测试消息</button>
       </div>
       <div class="settings-section">
         <h3>🔐 修改管理密码</h3>
@@ -401,19 +415,17 @@ function confirmOrder(){
     }
   }catch(e){}
 
-  // 企微Webhook（如果配置了）
-  var cfg=getConfig();
-  if(cfg.webhookUrl){
-    var md='## 🔔 三角洲新订单！\n\n'+
-      '> **打手：**<font color="warning">'+order.playerName+'</font>\n'+
-      '> **荣誉：**'+(currentPlayer.honor||'')+'\n'+
-      '> **服务：**'+order.quantity+order.unit+'\n'+
-      '> **金额：**<font color="info">¥'+order.totalPrice+'</font>\n'+
-      '> **电话：**<font color="comment">'+order.phone+'</font>\n'+
-      '> **时间：**'+order.time+'\n\n'+
-      '---\n*三角洲老板点单*';
-    sendWecomMsg(cfg.webhookUrl, md);
-  }
+  // 企业微信通知
+  var md='## 🔔 三角洲新订单！\n\n'+
+    '> **打手：**<font color="warning">'+order.playerName+'</font>\n'+
+    '> **荣誉：**'+(currentPlayer.honor||'')+'\n'+
+    '> **服务：**'+order.quantity+order.unit+'\n'+
+    '> **金额：**<font color="info">¥'+order.totalPrice+'</font>\n'+
+    '> **电话：**<font color="comment">'+order.phone+'</font>\n'+
+    '> **时间：**'+order.time+'\n\n'+
+    '---\n*三角洲老板点单*';
+  var text='🔔 三角洲新订单！\n\n打手：'+order.playerName+'\n荣誉：'+(currentPlayer.honor||'')+'\n服务：'+order.quantity+order.unit+'\n金额：¥'+order.totalPrice+'\n电话：'+order.phone+'\n时间：'+order.time;
+  notifyWecom(md, text);
 
   showModal('🎉','下单成功！','📋 订单已复制到剪贴板\n去微信群粘贴即可通知客服\n\n陪玩将尽快联系您～',[{text:'知道了',cls:'confirm',action:function(){closeOrderPanel();navBack()}}]);
 }
@@ -437,16 +449,60 @@ function submitCreate(){
 }
 
 // ==================== SETTINGS ====================
-function renderAdminSettings(){var c=getConfig();$_('#sWebhook').value=c.webhookUrl||'';$_('#sAdminPwd').value=c.adminPwd||''}
+var notiMode='webhook';
+function switchNotiMode(mode){notiMode=mode;$_('#notiWebhook').classList.toggle('active',mode==='webhook');$_('#notiApp').classList.toggle('active',mode==='app');$_('#notiWebhookFields').style.display=mode==='webhook'?'block':'none';$_('#notiAppFields').style.display=mode==='app'?'block':'none'}
+function renderAdminSettings(){var c=getConfig();$_('#sWebhook').value=c.webhookUrl||'';$_('#sAdminPwd').value=c.adminPwd||'';$_('#sCorpId').value=c.corpId||'';$_('#sAgentId').value=c.agentId||'';$_('#sSecret').value=c.secret||'';notiMode=c.notiMode||'webhook';switchNotiMode(notiMode)}
 function saveSettings(){
-  var c={webhookUrl:$_('#sWebhook').value.trim(),adminPwd:$_('#sAdminPwd').value.trim()||'120110'};
+  var c=getConfig();
+  c.webhookUrl=$_('#sWebhook').value.trim();
+  c.adminPwd=$_('#sAdminPwd').value.trim()||'120110';
+  c.corpId=$_('#sCorpId').value.trim();
+  c.agentId=$_('#sAgentId').value.trim();
+  c.secret=$_('#sSecret').value.trim();
+  c.notiMode=notiMode;
   saveConfig(c);showToast('✅ 设置已保存');
 }
-function testWebhook(){
-  var url=$_('#sWebhook').value.trim();
-  if(!url){showToast('请先填写Webhook地址');return}
-  showToast('⏳ 正在发送测试消息...');
-  sendWecomMsg(url,'## 🧪 测试消息\n\n三角洲老板点单通知配置成功！\n\n> 下单后将自动通知此群。').then(function(ok){if(ok)showToast('✅ 测试成功！请检查群消息');else showToast('❌ 发送失败，请检查地址')});
+// ==================== WECOM APP API (企业微信应用消息) ====================
+var _accessToken=null,_tokenExpire=0;
+function getWecomToken(corpId,secret){
+  var now=Date.now();
+  if(_accessToken&&now<_tokenExpire)return Promise.resolve(_accessToken);
+  return fetch('https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid='+encodeURIComponent(corpId)+'&corpsecret='+encodeURIComponent(secret)).then(function(r){return r.json()}).then(function(d){
+    if(d.errcode===0&&d.access_token){_accessToken=d.access_token;_tokenExpire=now+(d.expires_in-300)*1000;return _accessToken}
+    throw new Error('Token获取失败: '+(d.errmsg||''));
+  });
+}
+function sendWecomAppMsg(corpId,agentId,secret,content){
+  return getWecomToken(corpId,secret).then(function(token){
+    return fetch('https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token='+token,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({touser:'@all',msgtype:'text',agentid:parseInt(agentId),text:{content:content}})}).then(function(r){return r.json()}).then(function(d){return d.errcode===0});
+  });
+}
+function notifyWecom(markdown,text){
+  var cfg=getConfig();
+  if(cfg.notiMode==='app'&&cfg.corpId&&cfg.agentId&&cfg.secret){
+    return sendWecomAppMsg(cfg.corpId,cfg.agentId,cfg.secret,text).catch(function(){return false});
+  }
+  if(cfg.webhookUrl){
+    return sendWecomMsg(cfg.webhookUrl,markdown);
+  }
+  return Promise.resolve(false);
+}
+function testNotification(){
+  var cfg=getConfig();
+  if(notiMode==='app'){
+    var corpId=$_('#sCorpId').value.trim(),agentId=$_('#sAgentId').value.trim(),secret=$_('#sSecret').value.trim();
+    if(!corpId||!agentId||!secret){showToast('请填写完整的 CorpID、Bot ID 和 Secret');return}
+    // 先保存再测试
+    saveSettings();
+    showToast('⏳ 正在发送测试消息...');
+    sendWecomAppMsg(corpId,agentId,secret,'🧪 测试消息\n三角洲老板点单通知配置成功！\n下单后将自动通知此群。').then(function(ok){if(ok)showToast('✅ 测试成功！请检查企业微信');else showToast('❌ 发送失败，请检查配置')});
+  }else{
+    var url=$_('#sWebhook').value.trim();
+    if(!url){showToast('请先填写Webhook地址');return}
+    saveSettings();
+    showToast('⏳ 正在发送测试消息...');
+    sendWecomMsg(url,'## 🧪 测试消息\n\n三角洲老板点单通知配置成功！\n\n> 下单后将自动通知此群。').then(function(ok){if(ok)showToast('✅ 测试成功！请检查群消息');else showToast('❌ 发送失败，请检查地址')});
+  }
 }
 
 // ==================== ADMIN ====================
